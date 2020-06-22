@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+<!--{% load static %}-->
+{% block title %} User Details {% endblock %}
+{% block content %}
+    <div class="container">
+        <h1>User Details</h1>
+        {% if user_obj %}
+            <div>
+                <p><strong>Name:</strong> {{user_obj.name}}</p>
+            </div>
+            <div>
+                <p><strong>Email:</strong> {{user_obj.email}}</p>
+            </div>
+            <div>
+                <p><strong>User Level:</strong> {{user_obj.user_level}}</p>
+            </div>
+            <div>
+                <p><strong>Staff:</strong> {{user_obj.is_staff}}</p>
+            </div>
+            <div>
+                <p><strong>Active:</strong> {{user_obj.is_active}}</p>
+            </div>
+        {% else %}
+            <p>User does not exists</p>
+        {% endif %}
+    </div>
+{% endblock %}
