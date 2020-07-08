@@ -12,7 +12,8 @@ class CustomUserProfileAdmin(admin.ModelAdmin):
     add_form = RegistrationForm
     # form = CustomUserChangeForm
     model = CustomUserProfile
-    list_display = ['email', 'first_name', 'middle_initial', 'last_name', 'is_staff', 'is_active', 'is_superuser']
+    list_display = ['email', 'first_name', 'middle_initial', 'last_name', 'profile_pic','is_staff', 'is_active', 'is_superuser']
+    list_editable = ['profile_pic']
 
 
 class CoursesAdmin(admin.ModelAdmin):

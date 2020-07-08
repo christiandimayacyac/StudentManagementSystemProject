@@ -23,4 +23,43 @@ onDOMReady(function() {
         cardHeader.setAttribute('class', "card-header " + item.dataset.bg)
       })
     })
+
+    function doToggleBtn(){
+    }
+
+    function toggleDetail() {
+        console.log("Toggled")
+        const detailToggleBtn = document.getElementById('detail-toggle');
+
+        const visibles = document.querySelectorAll(".show-more")
+        const invisibles = document.querySelectorAll(".hide-more")
+
+        if (detailToggleBtn.innerText == "Show All Details") {
+            detailToggleBtn.innerHTML = "Show Basic Details";
+
+//            visibles.forEach(el => {
+//                el.classList.add('hide-detail');
+//            })
+
+            invisibles.forEach(el => {
+                el.classList.remove('hide-more');
+                el.classList.add('show-more');
+            })
+        } else {
+            detailToggleBtn.innerText = "Show All Details";
+
+//            invisibles.forEach(el => {
+//                el.classList.add('hide-detail');
+//            })
+
+            visibles.forEach(el => {
+                el.classList.remove('show-more');
+                el.classList.add('hide-more');
+            })
+        }
+    }
+
+    document.getElementById('detail-toggle').addEventListener('click', toggleDetail)
+
+
 });

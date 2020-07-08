@@ -22,6 +22,16 @@ from .models import (Student,
                      CustomUserProfile)
 
 
+def get_course_set():
+    queryset = Course.objects.all().order_by('course_name')
+    return queryset
+
+
+def get_staff_set():
+    queryset = CustomUserProfile.objects.filter(user_level=2)
+    return queryset
+
+
 class LoginForm(AuthenticationForm):
     user_level = forms.CharField(max_length=1, required=True)
 
@@ -101,27 +111,29 @@ class ModifiedCourseChoiceField(forms.ModelChoiceField):
         return obj.course_name
 
 
+class ModifiedStaffChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.staff_id
+
+
 class RegisterStudentForm(RegistrationForm):
     gender = forms.CharField(max_length=1)
     address = forms.CharField(max_length=255, widget=forms.TextInput())
     course_id = ModifiedCourseChoiceField(
-        queryset=Course.objects.all(),
+        queryset=Course.objects.all().order_by('course_name'),
         to_field_name='id',
         empty_label='Select a Course',
     )
 
     def clean_address(self):
-        print('Cleaning address data')
         data = self.cleaned_data['address']
         if data == '':
             data = 'Unspecified'
-        print("address" + data)
         return data
 
     # Override the default value of the user_level from 1 to 2
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print('Initializing')
         self.fields['user_level'].initial = 3
         self.fields['course_id'].widget.attrs['class'] = "form-control"
         self.fields['gender'].choices = (('', 'Select a Gender'), ('M', 'Male'), ('F', 'Female'))
@@ -143,17 +155,42 @@ class RegisterStudentForm(RegistrationForm):
             'gender',
             'address',
             'course_id',
+            'profile_pic',
         )
 
 
 class AddCourseForm(forms.ModelForm):
-
     class Meta:
         model = Course
         fields = (
             'course_name',
         )
 
+
+class AddSubjectForm(forms.ModelForm):
+    # course_id = ModifiedCourseChoiceField(
+    #     queryset=Course.objects.all().order_by('course_name'),
+    #     # queryset=Course.objects.all(),
+    #     to_field_name='id',
+    #     empty_label='Select a Course',
+    # )
+
+    course_id = forms.ModelChoiceField(
+        get_course_set()
+    )
+
+    staff_id = forms.ModelChoiceField(
+        get_staff_set()
+    )
+
+    class Meta:
+        model = Subject
+        fields = (
+            'subject_name',
+            'course_id',
+            'staff_id',
+        )
+        # fields = '__all__'
 
 
 # class RegisterStudentForm(forms.ModelForm):
@@ -179,3 +216,113 @@ class AddCourseForm(forms.ModelForm):
 # class SubjectForm(forms.ModelForm):
 #     class Meta:
 #         model = Subject
+
+
+class ManageStaffForm(forms.ModelForm):
+    class Meta:
+        model = CustomUserProfile
+
+        fields = '__all__'
+
+
+class ManageStudentsForm(forms.ModelForm):
+    class Meta:
+        model = CustomUserProfile
+
+        fields = '__all__'
+
+
+class ManageSubjectsForm(forms.ModelForm):
+    class Meta:
+        model = Subject
+
+        fields = '__all__'
+
+
+class ManageCoursesForm(forms.ModelForm):
+    class Meta:
+        model = Course
+
+        fields = '__all__'
+
+
+class EditStaffForm(forms.ModelForm):
+    address = forms.CharField()
+
+    class Meta:
+        model = get_user_model()
+
+        fields = (
+            'first_name',
+            'middle_initial',
+            'middle_initial',
+            'last_name',
+            'email',
+            'address',
+            'user_level'
+        )
+
+
+class EditStudentForm(forms.ModelForm):
+    gender = forms.CharField(max_length=1)
+    address = forms.CharField()
+    # course_id = ModifiedCourseChoiceField(
+    #     queryset=Course.objects.all().order_by('course_name'),
+    #     to_field_name='id',
+    #     empty_label='Select a Course',
+    # )
+    course_id = forms.ModelChoiceField(
+        get_course_set()
+    )
+    session_start = forms.DateTimeField()
+    session_end = forms.DateTimeField()
+    date_created = forms.DateTimeField()
+    date_updated = forms.DateTimeField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['gender'].choices = (('', 'Select a Gender'), ('M', 'Male'), ('F', 'Female'))
+
+    def clean_profile_pic(self):
+        data = self.cleaned_data['profile_pic']
+        if data == '':
+            data = '/default.png'
+        return data
+
+    class Meta:
+        model = get_user_model()
+
+        fields = (
+            'first_name',
+            'middle_initial',
+            'middle_initial',
+            'last_name',
+            'gender',
+            'email',
+            'address',
+            'user_level',
+            'profile_pic',
+            'course_id',
+            'session_start',
+            'session_end',
+            'date_created',
+        )
+
+
+class EditSubjectForm(forms.ModelForm):
+    course_id = forms.ModelChoiceField(
+        get_course_set()
+    )
+    staff_id = forms.ModelChoiceField(
+        get_staff_set()
+    )
+
+    class Meta:
+        model = Subject
+
+        fields = (
+            'subject_name',
+            'course_id',
+            'staff_id'
+        )
+

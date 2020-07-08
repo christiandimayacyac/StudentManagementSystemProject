@@ -22,7 +22,7 @@
                             <!-- general form elements -->
                             <div class="card card-primary">
                               <div class="card-header">
-                                <h3 class="card-title">Staff Registration Form</h3>
+                                <h3 class="card-title">Edit Staff</h3>
                               </div>
                               <!-- form start -->
                               <form method="POST">
@@ -35,50 +35,44 @@
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.first_name.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="text" class="form-control" name="first_name" placeholder="First Name" value="{{form.first_name.value|default:''}}">
+                                    <input type="text" class="form-control" name="first_name" placeholder="First Name" value="{{user_obj.first_name|default:''}}">
                                   </div>
                                     {% if form.middle_initial.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.middle_initial.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="text" class="form-control"name="middle_initial" maxlength="1" placeholder="Middle Initial" value="{{form.middle_initial.value|default:''}}">
+                                    <input type="text" class="form-control"name="middle_initial" maxlength="1" placeholder="Middle Initial" value="{{user_obj.middle_initial|default:''}}">
                                   </div>
                                     {% if form.last_name.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.last_name.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="text" class="form-control" name="last_name" placeholder="Last Name" value="{{form.last_name.value|default:''}}">
+                                    <input type="text" class="form-control" name="last_name" placeholder="Last Name" value="{{user_obj.last_name|default:''}}">
                                   </div>
                                     {% if form.email.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.email.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="email" class="form-control" name="email" placeholder="Enter email" value="{{form.email.value|default:''}}">
+                                    <input type="email" class="form-control" name="email" placeholder="Enter email" value="{{user_obj.email|default:''}}">
                                   </div>
                                     {% if form.user_level.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.user_level.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                      <input type="hidden" class="form-control" name="user_level" value="{{form.user_level.initial}}" readonly>
+                                      <input type="hidden" class="form-control" name="user_level" value="{{user_obj.user_level}}" readonly>
                                   </div>
                                     {% if form.address.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.address.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="text" class="form-control" name="address" placeholder="Address" value="{{form.address.value|default:''}}">
+                                    <input type="text" class="form-control" name="address" placeholder="Address" value="{{user_obj.staff.address|default:''}}">
                                   </div>
-                                    {% if form.password1.errors %}
-                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.password1.errors }}</div>
-                                    {% endif %}
-                                  <div class="form-group">
-                                    <input type="password" class="form-control" name="password1" placeholder="Password">
-                                  </div>
-                                    {% if form.password2.errors %}
-                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.password2.errors }}</div>
-                                    {% endif %}
-                                  <div class="form-group">
-                                    <input type="password" class="form-control" name="password2" placeholder="Confirm Password">
-                                  </div>
+<!--                                    {% if form.password1.errors %}-->
+<!--                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.password1.errors }}</div>-->
+<!--                                    {% endif %}-->
+<!--                                  <div class="form-group">-->
+<!--                                    <input type="password" class="form-control" name="password1" placeholder="Password">-->
+<!--                                  </div>-->
 <!--                                  <div class="form-group">-->
 <!--                                    <div class="input-group">-->
 <!--                                      <div class="custom-file">-->

@@ -18,6 +18,8 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=CustomUserProfile)
 def save_user_profile(sender, instance, **kwargs):
+    print("Saving custom user profile...")
+    print(instance.profile_pic.url)
     if instance.user_level == 1:
         instance.adminhod.save()
     if instance.user_level == 2:
