@@ -26,9 +26,9 @@
                         <div class="card-body">
                             <form method="POST">
                                 {% csrf_token %}
-                                <h3>Subject: <strong>{{subject_obj.subject_name}}</strong></h3>
+                                <h3>School Year: <strong>{{school_year_obj.get_school_year}}</strong></h3>
                                 <h4>Are you sure you want to delete the subject?</h4>
-                                <a class="btn btn-sm btn-secondary" href="{% url 'manage-subjects'%}">Cancel</a>
+                                <a class="btn btn-sm btn-secondary" href="{% url 'manage-school-year'%}">Cancel</a>
                                 <button class="btn btn-sm btn-danger" type="submit">Yes, Delete</button>
                             </form>
                         </div>

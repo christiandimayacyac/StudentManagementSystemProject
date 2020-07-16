@@ -26,9 +26,11 @@
                         <div class="card-body">
                             <form method="POST">
                                 {% csrf_token %}
-                                <h3>Subject: <strong>{{subject_obj.subject_name}}</strong></h3>
-                                <h4>Are you sure you want to delete the subject?</h4>
-                                <a class="btn btn-sm btn-secondary" href="{% url 'manage-subjects'%}">Cancel</a>
+                                <h3>Course: <strong>{{course_obj.course_name}}</strong></h3>
+                                <h3>Date Created: <strong>{{course_obj.date_created}}</strong></h3>
+                                <h3>Date Updated: <strong>{{course_obj.date_updated}}</strong></h3>
+                                <h4>Are you sure you want to delete the course?</h4>
+                                <a class="btn btn-sm btn-secondary" href="{% url 'manage-courses'%}">Cancel</a>
                                 <button class="btn btn-sm btn-danger" type="submit">Yes, Delete</button>
                             </form>
                         </div>

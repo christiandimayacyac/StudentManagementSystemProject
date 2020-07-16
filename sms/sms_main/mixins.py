@@ -53,3 +53,5 @@ class StudentCheckMixin(UserPassesTestMixin, UserRedirectMixin):
 
         redirect_path = self.get_next_url()
         return redirect(redirect_path)
+
+

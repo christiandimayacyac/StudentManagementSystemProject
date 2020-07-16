@@ -19,7 +19,12 @@ from .models import (Student,
                      StudentFeedBack,
                      LeaveReportStaff,
                      AttendanceReport,
-                     CustomUserProfile)
+                     CustomUserProfile, SchoolYearModel)
+
+
+def get_sy_set():
+    queryset = SchoolYearModel.objects.all().order_by('-id')
+    return queryset
 
 
 def get_course_set():
@@ -111,18 +116,28 @@ class ModifiedCourseChoiceField(forms.ModelChoiceField):
         return obj.course_name
 
 
+class ModifiedSchoolYearChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.school_year_start}-{obj.school_year_end}"
+
+
 class ModifiedStaffChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return obj.staff_id
 
 
 class RegisterStudentForm(RegistrationForm):
-    gender = forms.CharField(max_length=1)
+    gender = forms.CharField(max_length=1, widget=forms.Select())
     address = forms.CharField(max_length=255, widget=forms.TextInput())
     course_id = ModifiedCourseChoiceField(
         queryset=Course.objects.all().order_by('course_name'),
         to_field_name='id',
         empty_label='Select a Course',
+    )
+    school_year = ModifiedSchoolYearChoiceField(
+        queryset=SchoolYearModel.objects.all().order_by('id'),
+        to_field_name='id',
+        empty_label='Select a School Year',
     )
 
     def clean_address(self):
@@ -137,10 +152,6 @@ class RegisterStudentForm(RegistrationForm):
         self.fields['user_level'].initial = 3
         self.fields['course_id'].widget.attrs['class'] = "form-control"
         self.fields['gender'].choices = (('', 'Select a Gender'), ('M', 'Male'), ('F', 'Female'))
-        self.fields['session_start'] = forms.DateTimeField()
-        self.fields['session_end'] = forms.DateTimeField()
-        self.fields['session_start'].initial = datetime.now
-        self.fields['session_end'].initial = datetime.now
 
     class Meta:
         model = get_user_model()
@@ -155,6 +166,7 @@ class RegisterStudentForm(RegistrationForm):
             'gender',
             'address',
             'course_id',
+            'school_year',
             'profile_pic',
         )
 
@@ -165,6 +177,12 @@ class AddCourseForm(forms.ModelForm):
         fields = (
             'course_name',
         )
+
+    def clean_course_name(self):
+        new_course_name = self.cleaned_data['course_name']
+        if Course.objects.filter(course_name=new_course_name).exists():
+            raise forms.ValidationError('Course already exists')
+        return new_course_name
 
 
 class AddSubjectForm(forms.ModelForm):
@@ -190,7 +208,19 @@ class AddSubjectForm(forms.ModelForm):
             'course_id',
             'staff_id',
         )
-        # fields = '__all__'
+
+    def clean_subject_name(self):
+        new_subject_name = self.cleaned_data['subject_name']
+        if Subject.objects.filter(subject_name=new_subject_name).exists():
+            raise forms.ValidationError('Subject already exists')
+        return new_subject_name
+
+
+class AddSchoolYear(forms.ModelForm):
+    class Meta:
+        model = SchoolYearModel
+        fields = '__all__'
+
 
 
 # class RegisterStudentForm(forms.ModelForm):
@@ -274,9 +304,11 @@ class EditStudentForm(forms.ModelForm):
     course_id = forms.ModelChoiceField(
         get_course_set()
     )
-    session_start = forms.DateTimeField()
-    session_end = forms.DateTimeField()
-    date_created = forms.DateTimeField()
+    school_year = forms.ModelChoiceField(
+        get_sy_set()
+    )
+
+    # date_created = forms.DateTimeField()
     date_updated = forms.DateTimeField()
 
     def __init__(self, *args, **kwargs):
@@ -295,7 +327,6 @@ class EditStudentForm(forms.ModelForm):
         fields = (
             'first_name',
             'middle_initial',
-            'middle_initial',
             'last_name',
             'gender',
             'email',
@@ -303,9 +334,8 @@ class EditStudentForm(forms.ModelForm):
             'user_level',
             'profile_pic',
             'course_id',
-            'session_start',
-            'session_end',
-            'date_created',
+            'school_year',
+            'date_updated'
         )
 
 
@@ -325,4 +355,16 @@ class EditSubjectForm(forms.ModelForm):
             'course_id',
             'staff_id'
         )
+
+
+class EditCourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = '__all__'
+
+
+class EditSchoolYearForm(forms.ModelForm):
+    class Meta:
+        model = SchoolYearModel
+        fields = '__all__'
 

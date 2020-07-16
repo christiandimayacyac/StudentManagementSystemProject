@@ -61,11 +61,11 @@
                                     <div class="form-group">
                                         <select class="form-control" name="gender">
                                           {% for k, v in form.fields.gender.choices %}
-                                            <option value="{{k}}"
-                                            {% if k == '' %}
-                                            selected
+                                            {% if k == user_obj.student.gender  %}
+                                                <option value="{{k}}" selected>{{v}}</option>
+                                            {% else %}
+                                                <option value="{{k}}">{{v}}</option>
                                             {% endif %}
-                                            >{{v}}</option>
                                           {% endfor %}
                                         </select>
                                     </div>
@@ -107,39 +107,29 @@
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.session_start.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                      <label for="session_start">Session Start</label>
-                                    <input type="date" class="form-control" id="session_start" name="session_start" placeholder="Address" value="{{user_obj.student.session_start|default:''|date:'Y-m-d'}}">
+                                    <select class="form-control" name="school_year" placeholder="Latest School Year">
+<!--                                        {% for sy in form.fields.school_year.queryset %}-->
+<!--                                            {% if sy.get_school_year == user_obj.student.school_year.get_school_year %}-->
+<!--                                                <option value="{{sy.id}}" selected>{{sy.get_school_year}}</option>-->
+<!--                                            {% else %}-->
+<!--                                                <option value="{{sy.id}}">{{sy.get_school_year}}</option>-->
+<!--                                            {% endif %}-->
+<!--                                        {% endfor %}-->
+                                        {% for sy in school_year_obj %}
+                                            {% if sy.get_school_year == user_obj.student.school_year.get_school_year %}
+                                                <option value="{{sy.id}}" selected>{{sy.get_school_year}}</option>
+                                            {% else %}
+                                                <option value="{{sy.id}}">{{sy.get_school_year}}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
                                   </div>
-                                    {% if form.session_end.errors %}
-                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.session_end.errors }}</div>
+                                    {% if form.date_updated.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.date_updated.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                      <label for="session_end">Session End</label>
-                                    <input type="date" class="form-control" id="session_end" name="session_end" placeholder="Address" value="{{user_obj.student.session_end|default:''|date:'Y-m-d'}}">
+                                      <input type="hidden" class="form-control" name="date_updated" value="{% now 'Y-m-d' %}">
                                   </div>
-<!--                                    {% if form.date_updated.errors %}-->
-<!--                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.date_updated.errors }}</div>-->
-<!--                                    {% endif %}-->
-<!--                                  <div class="form-group">-->
-<!--                                    <input type="date" class="form-control" name="date_updated" placeholder="Address" value="{{user_obj.student.date_updated|default:''}}">-->
-<!--                                  </div>-->
-<!--                                    {% if form.password1.errors %}-->
-<!--                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.password1.errors }}</div>-->
-<!--                                    {% endif %}-->
-<!--                                  <div class="form-group">-->
-<!--                                    <input type="password" class="form-control" name="password1" placeholder="Password">-->
-<!--                                  </div>-->
-<!--                                  <div class="form-group">-->
-<!--                                    <div class="input-group">-->
-<!--                                      <div class="custom-file">-->
-<!--                                        <input type="file" class="custom-file-input" id="exampleInputFile">-->
-<!--                                        <label class="custom-file-label" for="exampleInputFile">Choose file</label>-->
-<!--                                      </div>-->
-<!--                                      <div class="input-group-append">-->
-<!--                                        <span class="input-group-text" id="">Upload</span>-->
-<!--                                      </div>-->
-<!--                                    </div>-->
-<!--                                  </div>-->
                                 </div>
                                 <!-- /.card-body -->
                                 <div class="card-footer">

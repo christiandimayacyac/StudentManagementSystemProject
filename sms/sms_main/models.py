@@ -129,6 +129,20 @@ class Staff(models.Model):
         return reverse('admin-dashboard')
 
 
+class SchoolYearModel(models.Model):
+    school_year_start = models.DateField()
+    school_year_end = models.DateField()
+
+    def __str__(self):
+        return f"{self.school_year_start.strftime('%Y')} - {self.school_year_end.strftime('%Y')}"
+
+    def get_school_year(self):
+        return f"{self.school_year_start.strftime('%Y')} - {self.school_year_end.strftime('%Y')}"
+
+    def get_absolute_url(self):
+        return reverse('manage-school-years')
+
+
 class Course(models.Model):
     course_name = models.CharField(max_length=255, blank=False, null=False)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -139,6 +153,31 @@ class Course(models.Model):
         return self.course_name
 
     def get_absolute_url(self):
+        return reverse('manage-courses')
+
+
+class Subject(models.Model):
+    subject_name = models.CharField(max_length=255, blank=False, null=False)
+    staff_id = models.ForeignKey(CustomUserProfile, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=timezone.now)
+    is_offered = models.BooleanField(default=True)
+
+    def get_course_id(self):
+        return self.course_id
+
+    def get_staff_id(self):
+        return self.staff_id
+
+    def get_absolute_url(self):
+        return reverse('admin-dashboard')
+
+
+class CourseSubjects(models.Model):
+    course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
+    subject_id = models.ForeignKey(Subject, on_delete=models.CASCADE)
+
+    def get_absolute_url(self):
         return reverse('admin-dashboard')
 
 
@@ -146,9 +185,8 @@ class Student(models.Model):
     user_profile = models.OneToOneField(CustomUserProfile, on_delete=models.CASCADE)
     gender = models.CharField(default="M", max_length=255, blank=False, null=False)
     address = models.TextField(blank=True, null=True)
-    course_id = models.ForeignKey(Course, on_delete=models.DO_NOTHING, null=True, to_field='id')
-    session_start = models.DateTimeField(default=None, null=True)
-    session_end = models.DateTimeField(default=None, null=True)
+    course_id = models.ForeignKey(Course, on_delete=models.PROTECT, null=True, to_field='id')
+    school_year = models.ForeignKey(SchoolYearModel, on_delete=models.CASCADE, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=timezone.now)
 
@@ -165,26 +203,10 @@ class Student(models.Model):
         return reverse('admin-dashboard')
 
 
-class Subject(models.Model):
-    subject_name = models.CharField(max_length=255, blank=False, null=False)
-    course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
-    staff_id = models.ForeignKey(CustomUserProfile, on_delete=models.CASCADE)
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_updated = models.DateTimeField(auto_now=timezone.now)
-
-    def get_course_id(self):
-        return self.course_id
-
-    def get_staff_id(self):
-        return self.staff_id
-
-    def get_absolute_url(self):
-        return reverse('admin-dashboard')
-
-
 class Attendance(models.Model):
     subject_id = models.ForeignKey(Subject, on_delete=models.DO_NOTHING)
     attendance_date = models.DateTimeField(auto_now_add=True)
+    school_year = models.ForeignKey(SchoolYearModel, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=timezone.now)
 

@@ -106,12 +106,12 @@
                                             <input type="file" id="profile_pic" class="form-control" name="profile_pic" placeholder="Profile Picture" style="padding: 3px">
                                         </div>
                                         <div class="form-group">
-                                            <label for="session_start">Session Start</label>
-                                            <input type="date" class="form-control" id="session_start" name="session_start" placeholder="Starting Session" value="{{form.fields.session_start.initial|date:'Y-m-d'}}" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="session_end">Session End</label>
-                                            <input type="date" class="form-control" id="session_end" name="session_end" placeholder="Ending Session" value="{{form.fields.session_end.initial|date:'Y-m-d'}}">
+                                            <select class="form-control" name="school_year" placeholder="School Year">
+                                                <option value="">-Select a School Year-</option>
+                                                {% for sy in school_year %}
+                                                    <option value="{{sy.id}}">{{sy.get_school_year}}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                         <div class="form-group">
                                             <input class="btn btn-primary" type="submit" value="Submit">

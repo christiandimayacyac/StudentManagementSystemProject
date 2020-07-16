@@ -69,19 +69,22 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="{% url 'add-staff' %}" class="nav-link active">
+              {% url 'add-staff' as add_staff %}
+              <a href="{{add_staff}}" class="nav-link {% if request.path == add_staff %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Add Staff</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'manage-staff' %}" class="nav-link">
+              {% url 'manage-staff' as manage_staff %}
+              <a href="{{manage_staff}}" class="nav-link {% if request.path == manage_staff %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Manage Staff</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="./index.html" class="nav-link">
+              {% url 'view-staff-feedback' as view_staff_feedback %}
+              <a href="{{view_staff_feedback}}" class="nav-link {% if request.path == view_staff_feedback %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>View Feedbacks</p>
               </a>
@@ -99,25 +102,29 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="{% url 'add-student' %}" class="nav-link active">
+              {% url 'add-student' as add_student %}
+              <a href="{{add_studentt}}" class="nav-link {% if request.path == add_student %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Add Student</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'manage-students' %}" class="nav-link">
+              {% url 'manage-students' as manage_students %}
+              <a href="{{manage_students}}" class="nav-link {% if request.path == manage_students %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Manage Students</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="./index.html" class="nav-link">
+              {% url 'view-student-feedback' as view_student_feedback %}
+              <a href="{{view_student_feedback}}" class="nav-link {% if request.path == view_student_feedback %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>View Feedbacks</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="./index.html" class="nav-link">
+              {% url 'view-student-attendance' as view_student_attendance %}
+              <a href="{{view_student_attendance}}" class="nav-link {% if request.path == view_student_attendance %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>View Attendance</p>
               </a>
@@ -135,16 +142,18 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="{% url 'add-course' %}" class="nav-link active">
+              {% url 'add-course' as add_course %}
+              <a href="{{add_course}}" class="nav-link {% if request.path == add_course %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Add Course</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'manage-courses' %}" class="nav-link">
+              {% url 'manage-courses' as manage_courses %}
+              <a href="{{manage_courses}}" class="nav-link {% if request.path == manage_courses %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Manage Courses</p>
-              </a>
+              </a>}
             </li>
           </ul>
         </li>
@@ -159,15 +168,43 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="{% url 'add-subject' %}" class="nav-link active">
+              {% url 'add-subject' as add_subject %}
+              <a href="{{add_subject}}" class="nav-link {% if request.path == add_subject %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Add Subject</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{% url 'manage-subjects' %}" class="nav-link">
+              {% url 'manage-subjects' as manage_subjects %}
+              <a href="{{manage_subjects}}" class="nav-link {% if request.path == manage_subjects %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Manage Subject</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <!--                      SCHOOL YEAR -->
+        <li class="nav-item has-treeview menu-close">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-book"></i>
+            <p>
+              SCHOOL YEAR
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              {% url 'add-school-year' as add_school_year %}
+              <a href="{{add_school_year}}" class="nav-link {% if request.path == add_school_year %}active{% endif %}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Add School Year</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              {% url 'manage-school-years' as manage_school_years %}
+              <a href="{{manage_school_years}}" class="nav-link {% if request.path == manage_school_years %}active{% endif %}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Manage School Year</p>
               </a>
             </li>
           </ul>s

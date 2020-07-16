@@ -22,7 +22,7 @@
                             <!-- general form elements -->
                                 <div class="card">
                                   <div class="card-header bg-secondary">
-                                    <h3 class="card-title">Course List</h3>
+                                    <h3 class="card-title">School Year List</h3>
 
                                     <div class="card-tools">
                                       <div class="input-group input-group-sm" style="width: 150px;">
@@ -40,18 +40,18 @@
                                       <thead>
                                         <tr>
                                           <th>ID</th>
-                                          <th>Course</th>
-                                          <th>Date Created</th>
+                                          <th>School Year Start</th>
+                                          <th>School Year End</th>
                                           <th>Action</th>
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {% for course in courses_obj %}
+                                        {% for sy in school_year_obj %}
                                         <tr>
-                                          <td>{{course.id}}</td>
-                                          <td>{{course.course_name}}</td>
-                                          <td>{{course.date_created}}</td>
-                                          <td><a href="{% url 'edit-course' course.id %}" class="btn btn-sm btn-success">Edit</a> <a href="{% url 'delete-course' course.id %}" class="btn btn-sm btn-danger">Delete</a></td>
+                                          <td>{{sy.id}}</td>
+                                          <td>{{sy.school_year_start}}</td>
+                                          <td>{{sy.school_year_end}}</td>
+                                          <td><a href="{% url 'edit-school-year' sy.id %}" class="btn btn-sm btn-success">Edit</a> <a href="{% url 'delete-school-year' sy.id %}" class="btn btn-sm btn-danger">Delete</a></td>
                                         </tr>
                                       {% endfor %}
                                       </tbody>
