@@ -1,0 +1,17 @@
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-title {
+    flex: 1;
+}
+
+#detail-toggle {
+    margin-right: 4px;
+}
+
+.hide-more{
+    display: none;
+}

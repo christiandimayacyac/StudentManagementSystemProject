@@ -1,0 +1,23 @@
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+
+      <div class="col-sm-12">
+        <ol class="breadcrumb float-sm-right">
+          {% for key, value in breadcrumbs.items %}
+            {% if value == '' %}
+              <li class="breadcrumb-item active">{{key}}</li>
+            {% else %}
+              <li class="breadcrumb-item"><a href="{% url value %}">{{key}}</a></li>
+            {% endif %}
+          {% endfor %}
+<!--          <li class="breadcrumb-item"><a href="#">Home</a></li>-->
+<!--          <li class="breadcrumb-item active">Dashboard v1</li>-->
+        </ol>
+      </div><!-- /.col -->
+    </div><!-- /.row -->
+    {% if user.is_authenticated %}
+      {% include 'admin/partials/_alerts.html' %}
+    {% endif %}
+  </div><!-- /.container-fluid -->
+</div>

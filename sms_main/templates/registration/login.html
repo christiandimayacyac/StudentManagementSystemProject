@@ -1,0 +1,72 @@
+{% include 'sms_main/partials/_login_reg_header.html' %}
+<body class="hold-transition login-page">
+<div class="login-box">
+  <div class="login-logo">
+    <a href="{% url 'demo' %}">Student Management System v1</a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="card">
+    <div class="card-header bg-primary">
+      <p id="login-title" class="mb-0 text-center">Admin Login</p>
+    </div>
+      <div class="card-body login-card-body">
+      <p class="login-box-msg">Sign in to start your session</p>
+      {% for message in messages %}
+      <p class="alert alert-{{message.tags}} alert-dismissible text-center" role="alert">{{message}}</p>
+      {% endfor %}
+      <form method="POST">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+          <input name="username" type="email" class="form-control" placeholder="Email">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-envelope"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input name="password" type="password" class="form-control" placeholder="Password">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-8">
+            <div class="icheck-primary">
+              <input type="checkbox" id="remember">
+              <label for="remember">
+                Remember Me
+              </label>
+            </div>
+          </div>
+          <!-- /.col -->
+          <input type="hidden" id="user-level" name="user_level" value="1">
+          <input type="hidden" id="next" name="next" value="{% url 'admin-dashboard' %}">
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+          </div>
+          <!-- /.col -->
+        </div>
+      </form>
+      <p class="mb-1">
+        <a href="forgot-password.html">I forgot my password</a>
+      </p>
+      <p class="mb-0">
+        <a href="{% url 'register' %}" class="text-center">Register a new membership</a>
+      </p>
+    </div>
+    <!-- /.login-card-body -->
+    </div>
+  </div>
+  <ul class="link-options list-unstyled">
+    <li><button class="login-options-btn active" data-logintype="1" data-next="{% url 'admin-dashboard' %}" data-bg="bg-primary">Admin Login</button></li>
+    <li><button class="login-options-btn" data-logintype="2" data-next="{% url 'staff-dashboard' %}" data-bg="bg-success">Staff Login</button></li>
+    <li><button class="login-options-btn" data-logintype="3" data-next="{% url 'student-dashboard' %}" data-bg="bg-warning">Student Login</button></li>
+  </ul>
+</div>
+<!-- /.login-box -->
+{% include 'sms_main/partials/_login_reg_footer.html' %}
+
+

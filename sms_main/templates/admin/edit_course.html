@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+    {% block content %}
+        <body class="hold-transition sidebar-mini layout-fixed">
+            <div class="wrapper">
+
+            <!-- Navbar -->
+            {% include 'admin/partials/_navbar.html' %}
+
+            <!-- Main Sidebar Container -->
+            {% include 'admin/partials/_main_sidebar.html' %}
+
+            <div class="content-wrapper">
+                <!-- Content Header (Page header) -->
+                {% include 'admin/partials/_main_content_header.html' %}
+
+                <!-- Main content -->
+                <section class="content">
+                    <div class="container-fluid">
+                        <div class="col-md-6">
+                            <!-- general form elements -->
+                            <div class="card card-primary">
+                              <div class="card-header">
+                                <h3 class="card-title">Edit Course</h3>
+                              </div>
+                              <!-- form start -->
+                              <form method="POST">
+                                <div class="card-body">
+                                {% csrf_token %}
+                                  {% if form.non_field_errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">Error: {{ form.non_field_errors }}</div>
+                                  {% endif %}
+                                    {% if form.course_name.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.course_name.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                    <input type="text" class="form-control" name="course_name" placeholder="Course Name" value="{{course_obj.course_name|default:''}}">
+                                  </div>
+                                <!-- /.card-body -->
+                                <div class="card-footer">
+                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                              </form>
+                            </div>
+                            <!-- /.card -->
+                          </div>
+                    </div><!-- /.container-fluid -->
+                </section>
+            </div>
+            </div>
+        </body>
+    {% endblock %}

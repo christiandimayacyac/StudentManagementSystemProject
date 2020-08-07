@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <body class="hold-transition sidebar-mini layout-fixed">
+        <div class="wrapper">
+
+            <!-- Navbar -->
+            {% include 'admin/partials/_navbar.html' %}
+            <!-- /.navbar -->
+
+            <!-- Main Sidebar Container -->
+            {% include 'staff/partials/_staff_main_sidebar.html' %}
+
+             <div class="content-wrapper">
+                <!-- Content Header (Page header) -->
+                {% include 'admin/partials/_main_content_header.html' %}
+
+                <!-- Main content -->
+                <section class="content">
+                    <div class="container-fluid">
+                        <div class="col-md-6">
+                            <div class="card card-primary">
+                              <div class="card-header">
+                                <h3 class="card-title">Student Attendance Report</h3>
+                              </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="staff_subject">Subject</label>
+                                        <select class="form-control" name="staff_subject" id="staff_subject">
+                                            {% for subj in subjects_obj %}
+                                                <option value="{{subj.id}}">{{subj.subject_name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="school_year">School Year</label>
+                                        <select class="form-control" name="school_year" id="school_year">
+                                            {% for sy in school_years_obj %}
+                                                <option value="{{sy.get_id}}">{{sy.get_school_year}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="form-control btn btn-primary btn-block" name="btn_fetch_attendance" id="btn_fetch_attendance">Fetch Attendance Date</button>
+                                    </div>
+                                    <div class="form-group" name="attendance_list" id="attendance_list">
+<!--                                        STUDENT LIST GOES HERE-->
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="form-control btn btn-success btn-block" name="btn_save_attendance" id="btn_save_attendance" disabled="disbaled">Save Attendance</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+             </div>
+        </div>
+        <script>
+            console.log("Document Ready");
+            document.getElementById("btn_fetch_attendance").addEventListener("click", fetchAttendance);
+            document.getElementById("btn_save_attendance").addEventListener("click", saveAttendance);
+            document.getElementById("school_year").addEventListener("change", resetAttendanceList);
+            document.getElementById("staff_subject").addEventListener("change", resetAttendanceList);
+
+            function resetAttendanceList() {
+                document.getElementById("attendance_list").innerHTML = "";
+                document.getElementById("btn_save_attendance").setAttribute("disabled", "disabled");
+            }
+
+            function fetchAttendance(e) {
+                e.preventDefault();
+                console.log("fetching attendance...");
+
+                <!-- Get field values for ajax parameters -->
+                const staff_id = {{user.id}}
+                const subject_id = document.getElementById("staff_subject").value;
+                const school_year_id = document.getElementById("school_year").value;
+
+                <!-- JSON stringify data parameters -->
+                let data = JSON.stringify({'staff_id': staff_id, 'subject_id': subject_id, 'school_year_id': school_year_id});
+
+                const xhr = new XMLHttpRequest()
+                xhr.open("POST", "{% url 'ajax-staff-fetch-attendance-report' %}");
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.onload = function() {
+                    const attendanceContainer = document.getElementById("attendance_list");
+                    if (this.status == 200) {
+                        const attendance = JSON.parse(this.responseText);
+                        htmlBlock = "<div class='form-group'>";
+                        if (attendance.length > 0) {
+                            attendance.forEach(att => {
+                               htmlBlock += "<div class='form-control'>"+ att.fields.attendance_date +"</div>";
+                            });
+                            document.getElementById("btn_save_attendance").removeAttribute("disabled", "disabled");
+                        }
+                        else {
+                            htmlBlock += "<p class='bg-warning text-center rounded p-1'>There are no attendance on this subject in the selected school year.</p>"
+                        }
+                        htmlBlock += "</div>";
+                        attendanceContainer.innerHTML = htmlBlock;
+                    }
+                    else {
+                        htmlBlock = "<p>Unable to fetch attendance records.</p>";
+                        attendanceContainer.innerHTML = htmlBlock;
+                    }
+
+                };
+                xhr.send(data);
+            }
+
+            function saveAttendance() {
+                const xhr = new XMLHttpRequest();
+                <!--  Convert NodeList Object to an array to be processed using map function -->
+                const attendance_list = Array.prototype.slice.call(document.getElementsByName("student[]"));
+                const present_students = attendance_list.map(function (student) {
+                                                return student.value;
+                                            });
+
+                let id_list = present_students;
+
+                xhr.open("POST", "{% url 'ajax-save-student-attendance' %}");
+                xhr.setRequestHeader("Content-Type", "application/json");
+
+                xhr.onload = function() {
+                    if (this.status == 200) {
+                        console.log("Saving attendance successful");
+                        const status = JSON.parse(this.responseText);
+                        console.log(status.status);
+                    }
+                    else {
+                        console.log("Error: 400");
+                    }
+                    <!--Redirect user to main dashboard for alert message status-->
+                    location.href = "/sms/staff/dashboard/attendance";
+                };
+
+                const subject_id = document.getElementById("staff_subject").value;
+                const school_year = document.getElementById("school_year").value;
+
+                const data = JSON.stringify({'id_list':id_list, 'subject_id':subject_id, 'school_year_id':school_year});
+
+                xhr.send(data);
+            }
+
+        </script>
+    </body>
+{% endblock %}

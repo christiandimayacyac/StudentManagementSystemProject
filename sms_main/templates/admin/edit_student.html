@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+    {% block content %}
+        <body class="hold-transition sidebar-mini layout-fixed">
+            <div class="wrapper">
+
+            <!-- Navbar -->
+            {% include 'admin/partials/_navbar.html' %}
+
+            <!-- Main Sidebar Container -->
+            {% include 'admin/partials/_main_sidebar.html' %}
+
+            <div class="content-wrapper">
+                <!-- Content Header (Page header) -->
+                {% include 'admin/partials/_main_content_header.html' %}
+
+                <!-- Main content -->
+                <section class="content">
+                    <div class="container-fluid">
+                        <div class="col-md-6">
+                            <!-- general form elements -->
+                            <div class="card card-primary">
+                              <div class="card-header">
+                                <h3 class="card-title">Edit Student</h3>
+                              </div>
+                              <!-- form start -->
+                              <form method="POST" enctype="multipart/form-data">
+                                <div class="card-body">
+                                {% csrf_token %}
+                                  {% if form.non_field_errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">Error: {{ form.non_field_errors }}</div>
+                                  {% endif %}
+                                    {% if form.first_name.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.first_name.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                    <input type="text" class="form-control" name="first_name" placeholder="First Name" value="{{user_obj.first_name|default:''}}">
+                                  </div>
+                                    {% if form.middle_initial.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.middle_initial.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                    <input type="text" class="form-control"name="middle_initial" maxlength="1" placeholder="Middle Initial" value="{{user_obj.middle_initial|default:''}}">
+                                  </div>
+                                    {% if form.last_name.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.last_name.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                    <input type="text" class="form-control" name="last_name" placeholder="Last Name" value="{{user_obj.last_name|default:''}}">
+                                  </div>
+                                    {% if form.email.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                    <input type="email" class="form-control" name="email" placeholder="Enter email" value="{{user_obj.email|default:''}}">
+                                  </div>
+                                    {% if form.gender.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.gender.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-group">
+                                        <select class="form-control" name="gender">
+                                          {% for k, v in form.fields.gender.choices %}
+                                            {% if k == user_obj.student.gender  %}
+                                                <option value="{{k}}" selected>{{v}}</option>
+                                            {% else %}
+                                                <option value="{{k}}">{{v}}</option>
+                                            {% endif %}
+                                          {% endfor %}
+                                        </select>
+                                    </div>
+                                    {% if form.course_id.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.course_id.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                    <select class="form-control" name="course_id" placeholder="Course">
+                                      <option value="">-Select a Course</option>
+                                      {% for course in course_obj %}
+                                        {% if course.course_name == user_obj.student.course_id.course_name  %}
+                                            <option value="{{course.id}}" selected>{{course.course_name}}</option>
+                                        {% else %}
+                                            <option value="{{course.id}}">{{course.course_name}}</option>
+                                        {% endif %}
+                                      {% endfor %}
+                                    </select>
+                                  </div>
+                                    {% if form.user_level.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.user_level.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                      <input type="hidden" class="form-control" name="user_level" value="{{user_obj.user_level}}" readonly>
+                                  </div>
+                                    {% if form.address.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.address.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                    <input type="text" class="form-control" name="address" placeholder="Address" value="{{user_obj.student.address|default:''}}">
+                                  </div>
+                                    {% if form.profile_pic.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.profile_pic.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                    <img src="{{user_obj.profile_pic.url}}" alt="Profile Picture" style="width:100px; height: 100px">
+                                    <input type="file" class="form-control" name="profile_pic" placeholder="Profile Picture" style="padding: 3px">
+                                  </div>
+                                    {% if form.session_start.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.session_start.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                    <select class="form-control" name="school_year" placeholder="Latest School Year">
+<!--                                        {% for sy in form.fields.school_year.queryset %}-->
+<!--                                            {% if sy.get_school_year == user_obj.student.school_year.get_school_year %}-->
+<!--                                                <option value="{{sy.id}}" selected>{{sy.get_school_year}}</option>-->
+<!--                                            {% else %}-->
+<!--                                                <option value="{{sy.id}}">{{sy.get_school_year}}</option>-->
+<!--                                            {% endif %}-->
+<!--                                        {% endfor %}-->
+                                        {% for sy in school_year_obj %}
+                                            {% if sy.get_school_year == user_obj.student.school_year.get_school_year %}
+                                                <option value="{{sy.id}}" selected>{{sy.get_school_year}}</option>
+                                            {% else %}
+                                                <option value="{{sy.id}}">{{sy.get_school_year}}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+                                    {% if form.date_updated.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.date_updated.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                      <input type="hidden" class="form-control" name="date_updated" value="{% now 'Y-m-d' %}">
+                                  </div>
+                                </div>
+                                <!-- /.card-body -->
+                                <div class="card-footer">
+                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                              </form>
+                            </div>
+                            <!-- /.card -->
+                          </div>
+                    </div><!-- /.container-fluid -->
+                </section>
+            </div>
+            </div>
+        </body>
+    {% endblock %}
