@@ -166,6 +166,7 @@ class RegisterStudentForm(RegistrationForm):
             'gender',
             'address',
             'course_id',
+            'section',
             'school_year',
             'profile_pic',
         )

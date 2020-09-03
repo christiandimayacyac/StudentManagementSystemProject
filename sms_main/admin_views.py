@@ -3,11 +3,11 @@ import json
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages import get_messages, info
+from django.contrib.messages import get_messages
 from django.core import serializers
 from django.db import models
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -34,17 +34,15 @@ def custom_message(request, msg, msg_tag):
             messages.success(request, msg)
         if msg_tag == "error":
             messages.error(request, msg)
-        if msg_tag =="warning":
+        if msg_tag == "warning":
             messages.warning(request, msg)
         if msg_tag == "info":
             messages.info(request, msg)
         if msg_tag == "debug":
             messages.debug(request, msg)
 
-
 class AdminDashboardView(LoginRequiredMixin, AdminCheckMixin, TemplateView):
     template_name = 'admin/admin_dashboard.html'
-    # breadcrumbs = OrderedDict()
     links = {'Home': ''}
 
     extra_context = {
@@ -56,11 +54,11 @@ class AdminDashboardView(LoginRequiredMixin, AdminCheckMixin, TemplateView):
 
 class AddStaffView(LoginRequiredMixin, AdminCheckMixin, CreateView):
     template_name = 'admin/add_staff.html'
-    extra_context = {'page_title': 'Add Staff'}
     model = get_user_model()
     form_class = RegisterStaffForm
     success_url = reverse_lazy('admin-dashboard')
     links = {
+        'page_title': 'Add Staff',
         'Home': 'admin-dashboard',
         'Add Staff': ''
     }
@@ -69,8 +67,6 @@ class AddStaffView(LoginRequiredMixin, AdminCheckMixin, CreateView):
         'page_header_title': 'Add Staff',
         'breadcrumbs': OrderedDict(links.items())
     }
-
-
 
     def form_valid(self, form):
         user = form.save()
@@ -105,6 +101,7 @@ class AddStudentView(LoginRequiredMixin, AdminCheckMixin, CreateView):
     }
 
     def form_valid(self, form):
+        print("Student info valid")
         user = form.save(commit=False)
         # Set instance attributes to be used by the signal for saving extra details in the Student Model
         user._gender = form.cleaned_data.get('gender')
@@ -114,18 +111,27 @@ class AddStudentView(LoginRequiredMixin, AdminCheckMixin, CreateView):
         user._year_level = form.cleaned_data.get('year_level')
         user._section = form.cleaned_data.get('section')
 
+
+
         user.save()
+
+        print('user')
+        print(user)
+        print(user.id)
+        print(user.student.id)
+
         # Make an entry for subjects enrolled by the student
         for subject in form.cleaned_data.get('subject_list'):
             # Get the subject and student instance
-            cur_subj = subject
             stud = user.student
-            subj = OfferedSubject(subject_id=cur_subj, student_id=stud, school_year=user._school_year)
+            subj = OfferedSubject(subject_id=subject, student_id=stud, school_year=user._school_year)
             subj.save()
         custom_message(self.request, "Student Registration Successful", "success")
         return super(AddStudentView, self).form_valid(form)
 
     def form_invalid(self, form):
+        print("Student info invalid")
+        print(form.cleaned_data)
         custom_message(self.request, "Student Registration Failed", "error")
         return super(AddStudentView, self).form_invalid(form)
 
@@ -180,6 +186,7 @@ class AddSectionView(CreateView):
     model = CourseSection
     template_name = 'admin/add_section.html'
     form_class = AddSectionForm
+    courses = Course.objects.all().order_by("course_name").only('id', 'course_name')
     success_url = reverse_lazy('add-section')
     links = {
         'Home': 'admin-dashboard',
@@ -187,6 +194,7 @@ class AddSectionView(CreateView):
     }
     extra_context = {
         'page_header_title': 'Add Section',
+        'courses_obj': courses,
         'breadcrumbs': OrderedDict(links.items())
     }
 
@@ -385,12 +393,15 @@ class EditSubjectView(LoginRequiredMixin, AdminCheckMixin, UpdateView):
         return get_object_or_404(Subject, id=subject_id)
 
     def form_valid(self, form):
+        print("valid")
+        print(form.cleaned_data)
         subject = form.save()
         subject.save()
         custom_message(self.request, "Subject Update Successful", "succes")
         return super(EditSubjectView, self).form_valid(form)
 
     def form_invalid(self, form):
+        print("invalid")
         messages.error(self.request, "Subject Update Failed", "error")
         return super(EditSubjectView, self).form_valid(form)
 
@@ -587,10 +598,10 @@ class AjaxGetSubjects(View):
             body_unicode = self.request.body
             body = json.loads(body_unicode)
             course_id = body['course_id']
-            course_subjects = Subject.objects.filter(course_id=course_id)
+            course_subjects = Subject.objects.filter(course_id=course_id, is_offered=True).order_by('subject_name')
 
             if not course_subjects:
-                data = {"none": None}
+                data = json.dumps({})
             else:
                 data = serializers.serialize('json', course_subjects, fields=('id', 'subject_name'))
             return HttpResponse(data, content_type="application/json")

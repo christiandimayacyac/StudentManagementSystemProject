@@ -31,6 +31,14 @@
                                   {% if form.non_field_errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">Error: {{ form.non_field_errors }}</div>
                                   {% endif %}
+                                    {% if form.is_offered.errors %}
+                                      <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.is_offered.errors }}</div>
+                                    {% endif %}
+                                  <div class="form-group">
+                                      <label for="is_offered">
+                                        <input type="checkbox" class="form-control" name="is_offered" id="is_offered" value="{{subject_obj.is_offered}}" {%if subject_obj.is_offered %}checked{% endif %}>Active
+                                      </label>
+                                  </div>
                                     {% if form.subject_name.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.subject_name.errors }}</div>
                                     {% endif %}
@@ -66,7 +74,6 @@
                                         {% endif %}
                                       {% endfor %}
                                     </select>
-<!--                                    <input type="text" class="form-control" name="staff_id" placeholder="Staff" value="{{subject_obj.staff_id|default:''}}">-->
                                   </div>
                                 </div>
                                 <!-- /.card-body -->
@@ -81,5 +88,14 @@
                 </section>
             </div>
             </div>
+            <script>
+                let isOffered = document.getElementById("is_offered");
+                isOffered.addEventListener("change", toggleIsActive);
+
+                function toggleIsActive(x) {
+                    isOffered.value = (isOffered.value == "True") ? "False" : "True";
+
+                }
+            </script>
         </body>
     {% endblock %}

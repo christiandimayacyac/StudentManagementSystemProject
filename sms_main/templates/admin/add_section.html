@@ -37,7 +37,17 @@
                                   <div class="form-group">
                                     <input type="text" class="form-control" name="section_name" placeholder="Section Name">
                                   </div>
-                                </div>
+                                  {% if form.course_id.errors %}
+                                    <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.course_id.errors }}</div>
+                                  {% endif %}
+                                  <div class="form-group">
+                                    <label for="staff_subject">Course</label>
+                                    <select class="form-control" name="course_id" id="course_id">
+                                        {% for course in courses_obj %}
+                                            <option value="{{course.id}}">{{course.course_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
                                 <!-- /.card-body -->
                                 <div class="card-footer">
                                   <button type="submit" class="btn btn-primary">Submit</button>

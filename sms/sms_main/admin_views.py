@@ -79,7 +79,7 @@ class AddStaffView(LoginRequiredMixin, AdminCheckMixin, CreateView):
 
 
 class AddStudentView(LoginRequiredMixin, AdminCheckMixin, CreateView):
-    template_name = 'admin/add_student.html'
+    template_name = 'admin/add_students.html'
     extra_context = {'page_title': 'Add Student'}
     model = get_user_model()
     form_class = RegisterStudentForm
@@ -106,6 +106,7 @@ class AddStudentView(LoginRequiredMixin, AdminCheckMixin, CreateView):
         user.student.address = form.cleaned_data.get('address')
         user.student.school_year = form.cleaned_data.get('school_year')
         user.student.course_id = form.cleaned_data.get('course_id')
+        user.student.section = form.cleaned_data.get('section')
         print('form_valid-before user.save')
         user.save()
         print('form_valid-after user.save')
@@ -114,7 +115,8 @@ class AddStudentView(LoginRequiredMixin, AdminCheckMixin, CreateView):
 
     def form_invalid(self, form):
         response = super().form_invalid(form)
-        custom_message(self.request, "Student Registration Failed", "error")
+        custom_message(self.request, "Student Registration Failedx", "error")
+        print("printing cleaned_data with error")
         print(form.cleaned_data)
         return response
 

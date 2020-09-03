@@ -33,7 +33,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=CustomUserProfile)
-def save_user_profile(sender, instance, **kwargs):
+def save_user_profile(sender, instance, created, **kwargs):
     print("Saving custom user profile...")
     if instance.user_level == 1:
         instance.adminhod.save()
@@ -45,5 +45,8 @@ def save_user_profile(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Attendance)
 def save_student_attendance(sender, instance, **kwargs):
+    print("save_student_attendance saving")
     student_id = getattr(instance, '_student_id', None)
-    AttendanceReport.objects.create(student_id=student_id, attendance_id=instance)
+    # If at least one student is present add an attendance entry on each student
+    if student_id:
+        AttendanceReport.objects.create(student_id=student_id, attendance_id=instance)

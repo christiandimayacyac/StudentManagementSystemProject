@@ -136,6 +136,7 @@ class ModifiedSectionChoiceField(forms.ModelChoiceField):
 class RegisterStudentForm(RegistrationForm):
     gender = forms.CharField(max_length=1, widget=forms.Select())
     year_level = forms.CharField(max_length=3, widget=forms.Select(), empty_value="Select a Year Level")
+    stat = forms.CharField(max_length=1, widget=forms.Select(), empty_value="Select Student Status")
     section = ModifiedSectionChoiceField(
         queryset=CourseSection.objects.all().order_by('-section_name'),
         to_field_name='id',
@@ -145,11 +146,10 @@ class RegisterStudentForm(RegistrationForm):
     course_id = ModifiedCourseChoiceField(
         queryset=Course.objects.all().order_by('course_name'),
         to_field_name='id',
-        empty_label='Select a Course',
+        empty_label='-Select a Course-',
     )
     subject_choices = Subject.objects.all()
     subject_list = forms.ModelMultipleChoiceField(queryset=subject_choices, widget=forms.CheckboxSelectMultiple)
-    stat = forms.CharField(max_length=255)
     school_year = ModifiedSchoolYearChoiceField(
         queryset=SchoolYearModel.objects.all().order_by('id'),
         to_field_name='id',
@@ -162,13 +162,14 @@ class RegisterStudentForm(RegistrationForm):
             data = 'Unspecified'
         return data
 
-    # Override the default value of the user_level from 1 to 2
+    # Override the default value of the user_level from 1 to 3
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['user_level'].initial = 3
         self.fields['course_id'].widget.attrs['class'] = "form-control"
         self.fields['gender'].choices = (('', '-Select a Gender-'), ('M', 'Male'), ('F', 'Female'))
         self.fields['year_level'].choices = Student.Levels.choices
+        self.fields['stat'].choices = Student.Status.choices
 
     class Meta:
         model = get_user_model()
@@ -235,8 +236,7 @@ class AddSubjectForm(forms.ModelForm):
         new_subject_name = cleaned_data['subject_name']
         staff = cleaned_data['staff_id']
         course = cleaned_data['course_id']
-        if Subject.objects.filter(subject_name=new_subject_name, staff_id=staff).exists() or Subject.objects.filter(subject_name=new_subject_name, course_id=course).exists():
-            print(staff)
+        if Subject.objects.filter(subject_name=new_subject_name, staff_id=staff, course_id=course).exists() or Subject.objects.filter(subject_name=new_subject_name, course_id=course).exists():
             raise forms.ValidationError(_('Subject already exists'))
 
         return cleaned_data
@@ -245,7 +245,10 @@ class AddSubjectForm(forms.ModelForm):
 class AddSectionForm(forms.ModelForm):
     class Meta:
         model = CourseSection
-        fields = '__all__'
+        fields = (
+            'section_name',
+            'course_id'
+        )
 
 
 class AddSchoolYearForm(forms.ModelForm):
@@ -253,6 +256,25 @@ class AddSchoolYearForm(forms.ModelForm):
         model = SchoolYearModel
         fields = '__all__'
 
+
+class CreateAttendanceForm(forms.ModelForm):
+    students = forms.MultipleChoiceField(required=False,widget=forms.CheckboxSelectMultiple(), choices=[])
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        student_choices = [(entry.user_profile.id, entry.user_profile.first_name) for entry in Student.objects.all().only('id', 'user_profile')]
+        print('student_choices')
+        print(student_choices)
+        self.fields['students'].choices = student_choices
+
+    class Meta:
+        model = Attendance
+        fields = (
+            'subject_id',
+            'section_id',
+            'school_year',
+            'students'
+        )
 
 
 # class RegisterStudentForm(forms.ModelForm):
@@ -385,8 +407,16 @@ class EditSubjectForm(forms.ModelForm):
         fields = (
             'subject_name',
             'course_id',
-            'staff_id'
+            'staff_id',
+            'is_offered'
         )
+
+    def clean_is_offered(self):
+        if self.cleaned_data['is_offered']:
+            print("checked")
+        else:
+            print("unchecked")
+        return self.cleaned_data['is_offered']
 
 
 class EditCourseForm(forms.ModelForm):
@@ -399,4 +429,23 @@ class EditSchoolYearForm(forms.ModelForm):
     class Meta:
         model = SchoolYearModel
         fields = '__all__'
+
+
+class DynamicMultipleChoiceField(forms.MultipleChoiceField):
+    def validate(self, value):
+        if self.required and not value:
+            raise ValidationError(self.error_messages['required'])
+
+
+class StudForm(forms.Form):
+    students = DynamicMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), choices=[])
+
+    def filter_students(self, data):
+        students_obj = get_user_model().objects.filter(student__subjects__staff_id=data['staff_id'],
+                                                       student__subjects__id=data['subject_id'],
+                                                       student__school_year__id=data['school_year_id'])
+        self.fields['students'].choices = [(student.pk, student.first_name) for student in students_obj]
+        print("printing choices")
+        print(self.fields['students'].choices)
+
 

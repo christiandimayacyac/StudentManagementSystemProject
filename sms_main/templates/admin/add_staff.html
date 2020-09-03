@@ -35,25 +35,25 @@
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.first_name.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="text" class="form-control" name="first_name" placeholder="First Name" value="{{form.first_name.value|default:''}}">
+                                    <input type="text" class="form-control" name="first_name" placeholder="First Name" value="{{form.first_name.value|default:''}}" required>
                                   </div>
                                     {% if form.middle_initial.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.middle_initial.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="text" class="form-control"name="middle_initial" maxlength="1" placeholder="Middle Initial" value="{{form.middle_initial.value|default:''}}">
+                                    <input type="text" class="form-control"name="middle_initial" maxlength="1" placeholder="Middle Initial" value="{{form.middle_initial.value|default:''}}" required>
                                   </div>
                                     {% if form.last_name.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.last_name.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="text" class="form-control" name="last_name" placeholder="Last Name" value="{{form.last_name.value|default:''}}">
+                                    <input type="text" class="form-control" name="last_name" placeholder="Last Name" value="{{form.last_name.value|default:''}}" required>
                                   </div>
                                     {% if form.email.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.email.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="email" class="form-control" name="email" placeholder="Enter email" value="{{form.email.value|default:''}}">
+                                    <input type="email" class="form-control" name="email" placeholder="Enter email" value="{{form.email.value|default:''}}" required>
                                   </div>
                                     {% if form.user_level.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.user_level.errors }}</div>
@@ -65,19 +65,19 @@
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.address.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="text" class="form-control" name="address" placeholder="Address" value="{{form.address.value|default:''}}">
+                                    <input type="text" class="form-control" name="address" placeholder="Address" value="{{form.address.value|default:''}}" required>
                                   </div>
                                     {% if form.password1.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.password1.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="password" class="form-control" name="password1" placeholder="Password">
+                                    <input type="password" class="form-control" name="password1" placeholder="Password" required>
                                   </div>
                                     {% if form.password2.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.password2.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="password" class="form-control" name="password2" placeholder="Confirm Password">
+                                    <input type="password" class="form-control" name="password2" placeholder="Confirm Password" required>
                                   </div>
 <!--                                  <div class="form-group">-->
 <!--                                    <div class="input-group">-->

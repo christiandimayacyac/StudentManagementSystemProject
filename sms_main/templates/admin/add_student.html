@@ -59,20 +59,10 @@
                                           <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.level.errors }}</div>
                                         {% endif %}
                                         <div class="form-group">
-                                            <select class="form-control" name="year_level">
+                                            <select class="form-control" name="year_level" required>
                                                 <option value="">-Select a Year Level-</option>
                                               {% for k, v in form.fields.year_level.choices %}
                                                 <option value="{{k}}">{{v}}</option>
-                                              {% endfor %}
-                                            </select>
-                                        </div>
-                                        {% if form.section.errors %}
-                                          <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.section.errors }}</div>
-                                        {% endif %}
-                                        <div class="form-group">
-                                            <select class="form-control" name="section">
-                                              {% for k,v in form.fields.section.choices %}
-                                                <option value="{{k}}" {% if k == '' %}selected{% endif %}>{{v}}</option>
                                               {% endfor %}
                                             </select>
                                         </div>
@@ -83,13 +73,13 @@
                                             <input type="hidden" class="form-control"name="user_level" placeholder="User Level" value="{{form.user_level.value|default:form.fields.user_level.initial}}" readonly>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" class="form-control" name="address" placeholder="Address" value="{{form.address.value|default:''}}">
+                                            <input type="text" class="form-control" name="address" placeholder="Address" value="{{form.address.value|default:''}}" required>
                                         </div>
                                         {% if form.gender.errors %}
                                           <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.gender.errors }}</div>
                                         {% endif %}
                                         <div class="form-group">
-                                            <select class="form-control" name="gender">
+                                            <select class="form-control" name="gender" required>
                                               {% for k, v in form.fields.gender.choices %}
                                                 <option value="{{k}}" {% if k == '' %}selected{% endif %}>{{v}}</option>
                                               {% endfor %}
@@ -99,25 +89,34 @@
                                           <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.password1.errors }}</div>
                                         {% endif %}
                                         <div class="form-group">
-                                            <input type="password" class="form-control" name="password1" placeholder="Password" required>
+                                            <input type="password" class="form-control" name="password1" placeholder="Password"  value="Bahongtae123" required>
                                         </div>
                                         {% if form.password2.errors %}
                                           <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.password2.errors }}</div>
                                         {% endif %}
                                         <div class="form-group">
-                                            <input type="password" class="form-control" name="password2" placeholder="Confirm Password" required>
+                                            <input type="password" class="form-control" name="password2" placeholder="Confirm Password" value="Bahongtae123" required>
                                         </div>
                                         {% if form.course_id.errors %}
                                           <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.course_id.errors }}</div>
                                         {% endif %}
                                         <div class="form-group">
-                                            <select class="form-control" name="course_id" id="course_id">
+                                            <select class="form-control" name="course_id" id="course_id" required>
                                                 {% for k, v in form.fields.course_id.choices %}
                                                     <option value="{{k}}">{{v}}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
-                                        <div class="dynamic-subject-container" id="course_subjects">
+                                        {% if form.section.errors %}
+                                          <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.section.errors }}</div>
+                                        {% endif %}
+                                        <div class="form-group" id="section_list">
+<!--                                            Section goes here-->
+                                        </div>
+                                        {% if form.subject_list.errors %}
+                                          <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.subject_list.errors }}</div>
+                                        {% endif %}
+                                        <div class="col-md-12" id="course_subjects">
 <!--                                            Subjects goes here-->
                                         </div>
                                         <div class="form-group">
@@ -129,12 +128,25 @@
                                             <label for="profile_pic" style="margin-left: 10px">Profile Picture</label>
                                             <input type="file" id="profile_pic" class="form-control" name="profile_pic" placeholder="Profile Picture" style="padding: 3px">
                                         </div>
+                                        {% if form.school_year.errors %}
+                                          <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.school_year.errors }}</div>
+                                        {% endif %}
                                         <div class="form-group">
-                                            <select class="form-control" name="school_year" placeholder="School Year">
+                                            <select class="form-control" name="school_year" placeholder="School Year" required>
                                                 <option value="">-Select a School Year-</option>
                                                 {% for sy in school_year %}
                                                     <option value="{{sy.id}}">{{sy.get_school_year}}</option>
                                                 {% endfor %}
+                                            </select>
+                                        </div>
+                                        {% if form.stat.errors %}
+                                          <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.stat.errors }}</div>
+                                        {% endif %}
+                                        <div class="form-group">
+                                            <select class="form-control" name="stat" required>
+                                              {% for k, v in form.fields.stat.choices %}
+                                                <option value="{{k}}" {% if k == '' %}selected{% endif %}>{{v}}</option>
+                                              {% endfor %}
                                             </select>
                                         </div>
                                         <div class="form-group">
@@ -150,49 +162,80 @@
             </div>
             <script src="/static/plugins/jquery/jquery.min.js"></script>
             <script>
-                document.getElementById("course_id").addEventListener("change", getSubjects);
+<!--                document.getElementById("course_id").addEventListener("change", () => {-->
+<!--                                                                getSubjects(),-->
+<!--                                                                fetchSections()-->
+<!--                                                            });-->
 
-                function getSubjects() {
-                    var id = document.getElementById("course_id").value;
-                    console.log("the course_id is: "+id);
-                    var xhr = new XMLHttpRequest();
-<!--                    var jsonstr = {'course_id': id};-->
-                    var data = JSON.stringify({'course_id': id});
-                    console.log("the data stringified is: "+data);
+<!--                function fetchSections() {-->
+<!--                    const courseId = document.getElementById("course_id").value;-->
+<!--                    data = JSON.stringify({'courseId': courseId});-->
+<!--                    const xhr = new XMLHttpRequest();-->
+<!--                    xhr.open("POST", "{% url 'ajax-staff-fetch-sections' %}");-->
+<!--                    xhr.setRequestHeader("Content-Type", "application/json");-->
+<!--                    xhr.onload = function() {-->
+<!--                        const secContainer = document.getElementById("section_list");-->
+<!--                        if (this.status == 200) {-->
+<!--                            const sections = JSON.parse(this.responseText);-->
+<!--                            let htmlBlock = "<select class='form-control' name='section' id='section'>";-->
+<!--                            if (sections.length > 0) {-->
+<!--                                sections.forEach(section=> {-->
+<!--                                   htmlBlock += "<option value='"+ section.pk +"'>"+ section.fields.section_name +"</option>";-->
+<!--                                });-->
+<!--                                htmlBlock += "</select>";-->
+<!--                            }-->
+<!--                            else {-->
+<!--                                htmlBlock += "<p class='bg-warning text-center rounded p-1'>There are no section entry on this course in the selected school year.</p>"-->
+<!--                            }-->
+<!--                            secContainer.innerHTML = htmlBlock;-->
+<!--                        }-->
+<!--                        else {-->
+<!--                            htmlBlock = "<p>Unable to fetch section records.</p>";-->
+<!--                            secContainer.innerHTML = htmlBlock;-->
+<!--                        }-->
 
-                    document.getElementById("course_subjects").innerHTML = '';
+<!--                    };-->
+<!--                    xhr.send(data);-->
 
-                    xhr.open("POST", "{% url 'ajax-get-subjects' %}", true);
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.onload = function() {
-                        if (this.status == 200) {
-                            var courseSubjects = JSON.parse(this.responseText);
+<!--                }-->
 
-                            var htmlBlock = "";
+<!--                function getSubjects() {-->
+<!--                    var id = document.getElementById("course_id").value;-->
+<!--                    var xhr = new XMLHttpRequest();-->
+<!--                    var data = JSON.stringify({'course_id': id});-->
 
-                            courseSubjects.forEach(renderSubjects);
+<!--                    document.getElementById("course_subjects").innerHTML = '';-->
 
-                            function renderSubjects(subject) {
-                                console.log(subject);
-                                htmlBlock += '<div class="form-group"><input type="checkbox" name="subject_list" id="subject_'+subject.fields.subject_name +
-                                '" value="'+subject.pk+'">' +
-                                '<label for="subject_'+subject.fields.subject_name+'" class="ml-1">' +
-                                subject.fields.subject_name + '</label></div>'
-                            }
+<!--                    xhr.open("POST", "{% url 'ajax-get-subjects' %}", true);-->
+<!--                    xhr.setRequestHeader('Content-Type', 'application/json');-->
+<!--                    xhr.onload = function() {-->
+<!--                        let htmlBlock = "<div class='card card-primary'><div class='card-header'><h3 class='card-title'>Subjects</h3></div><div class='card-body'>";-->
+<!--                        if (this.status == 200) {-->
+<!--                            let courseSubjects = JSON.parse(this.responseText);-->
+<!--                            if (courseSubjects.length > 0) {-->
+<!--                                courseSubjects.forEach(renderSubjects);-->
 
-<!--                            console.log(courseSubjects);-->
-                                htmlBlock += '<div><input type="text" name="stat" id="stat" value="ok"></div>'
-                                document.getElementById("course_subjects").innerHTML = htmlBlock;
+<!--                                function renderSubjects(subject) {-->
+<!--                                    htmlBlock += '<div class="form-check"><input type="checkbox" name="subject_list" id="subject_'+subject.fields.subject_name +-->
+<!--                                    '" value="'+subject.pk+'">' +-->
+<!--                                    '<label for="subject_'+subject.fields.subject_name+'" class="ml-1">' +-->
+<!--                                    subject.fields.subject_name + '</label></div>'-->
+<!--                                }-->
+<!--                            }-->
+<!--                            else {-->
+<!--                                htmlBlock += "<p class='bg-warning text-center rounded p-1'>There are no subjects offered under the selected course.</p>"-->
+<!--                            }-->
 
-                        }
-                        else {
-                            console.log("Error fetching subjects");
-                        }
-                    };
-
-<!--                    console.log(data);-->
-                    xhr.send(data);
-                }
+<!--                        }-->
+<!--                        else {-->
+<!--                            htmlBlock += "<p class='bg-warning text-center rounded p-1'>Unable to retrieve course subjects.</p>"-->
+<!--                        }-->
+<!--                        htmlBlock += '</div></div>'-->
+<!--                        document.getElementById("course_subjects").innerHTML = htmlBlock;-->
+<!--                    };-->
+<!--                    xhr.send(data);-->
+<!--                }-->
             </script>
+            <script src="{% static 'js/admin.js' %}"></script>
         </body>
     {% endblock %}

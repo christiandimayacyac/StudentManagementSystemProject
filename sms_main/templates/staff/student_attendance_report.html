@@ -28,6 +28,7 @@
                                     <div class="form-group">
                                         <label for="staff_subject">Subject</label>
                                         <select class="form-control" name="staff_subject" id="staff_subject">
+                                            <option value="">-Select a Subject-</option>
                                             {% for subj in subjects_obj %}
                                                 <option value="{{subj.id}}">{{subj.subject_name}}</option>
                                             {% endfor %}
@@ -45,10 +46,16 @@
                                         <button class="form-control btn btn-primary btn-block" name="btn_fetch_attendance" id="btn_fetch_attendance">Fetch Attendance Date</button>
                                     </div>
                                     <div class="form-group" name="attendance_list" id="attendance_list">
+<!--                                        ATTENDANCE LIST GOES HERE-->
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="form-control btn btn-success btn-block" name="btn_view_attendance" id="btn_view_attendance" disabled="disbaled">View Attendance</button>
+                                    </div>
+                                    <div class="form-group" name="students_list" id="students_list">
 <!--                                        STUDENT LIST GOES HERE-->
                                     </div>
                                     <div class="form-group">
-                                        <button class="form-control btn btn-success btn-block" name="btn_save_attendance" id="btn_save_attendance" disabled="disbaled">Save Attendance</button>
+                                        <button class="form-control btn btn-primary btn-block" name="btn_save_attendance_report" id="btn_save_attendance_report" disabled="disbaled">Save Attendance Report</button>
                                     </div>
                                 </div>
                             </div>
@@ -60,13 +67,17 @@
         <script>
             console.log("Document Ready");
             document.getElementById("btn_fetch_attendance").addEventListener("click", fetchAttendance);
-            document.getElementById("btn_save_attendance").addEventListener("click", saveAttendance);
+            document.getElementById("btn_view_attendance").addEventListener("click", viewAttendance);
+            document.getElementById("btn_save_attendance_report").addEventListener("click", saveAttendanceReport);
             document.getElementById("school_year").addEventListener("change", resetAttendanceList);
             document.getElementById("staff_subject").addEventListener("change", resetAttendanceList);
 
+
             function resetAttendanceList() {
                 document.getElementById("attendance_list").innerHTML = "";
-                document.getElementById("btn_save_attendance").setAttribute("disabled", "disabled");
+                document.getElementById("btn_view_attendance").setAttribute("disabled", "disabled");
+                document.getElementById("btn_save_attendance_report").setAttribute("disabled", "disabled");
+                document.getElementById("students_list").innerHTML = "";
             }
 
             function fetchAttendance(e) {
@@ -77,6 +88,7 @@
                 const staff_id = {{user.id}}
                 const subject_id = document.getElementById("staff_subject").value;
                 const school_year_id = document.getElementById("school_year").value;
+
 
                 <!-- JSON stringify data parameters -->
                 let data = JSON.stringify({'staff_id': staff_id, 'subject_id': subject_id, 'school_year_id': school_year_id});
@@ -90,10 +102,15 @@
                         const attendance = JSON.parse(this.responseText);
                         htmlBlock = "<div class='form-group'>";
                         if (attendance.length > 0) {
+                            console.log(attendance);
+                            htmlBlock = "<select class='form-control' name='attendance' id='attendance'>"
                             attendance.forEach(att => {
-                               htmlBlock += "<div class='form-control'>"+ att.fields.attendance_date +"</div>";
+                               htmlBlock += "<option value='" + att.pk + "'>"+
+                               att.fields.attendance_date +
+                               "</option>";
                             });
-                            document.getElementById("btn_save_attendance").removeAttribute("disabled", "disabled");
+                            htmlBlock += "</select>"
+                            document.getElementById("btn_view_attendance").removeAttribute("disabled", "disabled");
                         }
                         else {
                             htmlBlock += "<p class='bg-warning text-center rounded p-1'>There are no attendance on this subject in the selected school year.</p>"
@@ -110,37 +127,82 @@
                 xhr.send(data);
             }
 
-            function saveAttendance() {
+            function viewAttendance() {
                 const xhr = new XMLHttpRequest();
-                <!--  Convert NodeList Object to an array to be processed using map function -->
-                const attendance_list = Array.prototype.slice.call(document.getElementsByName("student[]"));
-                const present_students = attendance_list.map(function (student) {
-                                                return student.value;
-                                            });
+                const attendance = document.getElementById("attendance").value;
+                const subject_id = document.getElementById("staff_subject").value;
+                const school_year_id = document.getElementById("school_year").value;
 
-                let id_list = present_students;
-
-                xhr.open("POST", "{% url 'ajax-save-student-attendance' %}");
+                xhr.open("POST", "{% url 'ajax-view-student-attendance' %}");
                 xhr.setRequestHeader("Content-Type", "application/json");
 
                 xhr.onload = function() {
                     if (this.status == 200) {
-                        console.log("Saving attendance successful");
-                        const status = JSON.parse(this.responseText);
-                        console.log(status.status);
+                        console.log("viewing attendance successful");
+                        const attendance_list = JSON.parse(this.responseText);
+                        htmlBlock = "";
+                        attendance_list.forEach(student=>{
+                            <!-- Student[2] - third array that contains the is_present value  -->
+                            if (student[2].is_present){
+                                htmlBlock += "<div class='form-control'><label><input type='checkbox' value='"+ student[0].id +"' name='students[]' checked> " + student[1].full_name + "</label></div>"
+                            }
+                            else {
+                                htmlBlock += "<div class='form-control'><label><input type='checkbox' value='"+ student[0].id +"' name='students[]' > " + student[1].full_name + "</label></div>"
+                            }
+                        });
+                        document.getElementById("students_list").innerHTML = htmlBlock;
+
+                        const students = document.getElementsByName("students[]")
+                        console.log(students);
+                        students.forEach(stud => {
+                            console.log("adding change");
+                            stud.addEventListener("click", function() {
+                                console.log("change");
+                                document.getElementById("btn_save_attendance_report").removeAttribute("disabled");
+                            });
+                        });
+
+                    }
+                    else {
+                        console.log("Error: 400");
+                    }
+                };
+
+                const data = JSON.stringify({'attendance':attendance, 'subject_id':subject_id, 'school_year_id':school_year_id});
+
+                xhr.send(data);
+            }
+
+            function saveAttendanceReport() {
+                const new_attendance = document.getElementsByName("students[]");
+                const subject_id = document.getElementById("staff_subject").value;
+                const attendance_id = document.getElementById("attendance").value;
+                id_list = [];
+                new_attendance.forEach(stud => {
+                    if (stud.checked) {
+                        id_list.push({'id':stud.value, 'status':1});
+                    }
+                    else {
+                        id_list.push({'id':stud.value, 'status':0});
+                    }
+
+                });
+                data = JSON.stringify({'id_list':id_list, 'attendance_id':attendance_id})
+                const xhr = new XMLHttpRequest();
+
+                xhr.open("POST", "{% url 'ajax-update-student-attendance-report' %}");
+                xhr.setRequestHeader("Content-Type", "application/json");
+
+                xhr.onload = function() {
+                    if (this.status == 200) {
+                        console.log("viewing attendance successful");
                     }
                     else {
                         console.log("Error: 400");
                     }
                     <!--Redirect user to main dashboard for alert message status-->
-                    location.href = "/sms/staff/dashboard/attendance";
+                    location.href = "/sms/staff/dashboard/";
                 };
-
-                const subject_id = document.getElementById("staff_subject").value;
-                const school_year = document.getElementById("school_year").value;
-
-                const data = JSON.stringify({'id_list':id_list, 'subject_id':subject_id, 'school_year_id':school_year});
-
                 xhr.send(data);
             }
 

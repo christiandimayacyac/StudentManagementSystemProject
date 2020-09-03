@@ -182,6 +182,7 @@ class Subject(models.Model):
 
 class CourseSection(models.Model):
     section_name = models.CharField(default='FLOATING', max_length=255, blank=False, null=False)
+    course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     def __str__(self):
         """Return string representation of the user"""
@@ -245,6 +246,9 @@ class OfferedSubject(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=datetime.now)
 
+    def get_absolute_url(self):
+        return reverse('admin-dashboard')
+
 
 class CourseSubjects(models.Model):
     course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -256,6 +260,7 @@ class CourseSubjects(models.Model):
 
 class Attendance(models.Model):
     subject_id = models.ForeignKey(Subject, on_delete=models.DO_NOTHING)
+    section_id = models.ForeignKey(CourseSection, on_delete=models.CASCADE)
     attendance_date = models.DateTimeField(auto_now_add=True)
     school_year = models.ForeignKey(SchoolYearModel, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)

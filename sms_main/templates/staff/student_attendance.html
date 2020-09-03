@@ -25,31 +25,48 @@
                                 <h3 class="card-title">Student Attendance for {{current_date}}</h3>
                               </div>
                                 <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="staff_subject">Subject</label>
-                                        <select class="form-control" name="staff_subject" id="staff_subject">
-                                            {% for subj in subjects_obj %}
-                                                <option value="{{subj.id}}">{{subj.subject_name}}</option>
+                                    {% if form.errors %}
+                                        <div id="form-error">
+                                            <p>The operation could not be performed because one or more error(s) occurred.<br />Please resubmit the form after making the following changes:</p>
+                                            <ul>
+                                            {% for field in form %}
+                                            <li>{{field.label}}-{{ field.errors|striptags }}</li>
                                             {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="school_year">School Year</label>
-                                        <select class="form-control" name="school_year" id="school_year">
-                                            {% for sy in school_years_obj %}
-                                                <option value="{{sy.get_id}}">{{sy.get_school_year}}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <button class="form-control btn btn-primary btn-block" name="btn_fetch_students" id="btn_fetch_students">Fetch Students</button>
-                                    </div>
-                                    <div class="form-group" name="student_list" id="student_list">
-<!--                                        STUDENT LIST GOES HERE-->
-                                    </div>
-                                    <div class="form-group">
-                                        <button class="form-control btn btn-success btn-block" name="btn_save_attendance" id="btn_save_attendance" disabled="disbaled">Save Attendance</button>
-                                    </div>
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                    <form action="" method="POST">
+                                    {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="staff_subject">Subject</label>
+                                            <select class="form-control" name="subject_id" id="subject_id">
+                                                <option value="" selected>-Select a Subject-</option>
+                                                {% for subj in form.initial.subjects_obj %}
+                                                    <option value="{{subj.id}}" data-course="{{subj.course_id.id}}">{{subj.subject_name}} - {{subj.course_id.course_name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group" id="section_list">
+    <!--                                        SECTION LIST GOES HERE-->
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="school_year">School Year</label>
+                                            <select class="form-control" name="school_year" id="school_year">
+                                                {% for sy in form.initial.school_years_obj %}
+                                                    <option value="{{sy.get_id}}">{{sy.get_school_year}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <button class="form-control btn btn-primary btn-block" name="btn_fetch_students" id="btn_fetch_students">Fetch Students</button>
+                                        </div>
+                                        <div class="student_options" name="student_list" id="student_list">
+    <!--                                        STUDENT LIST GOES HERE-->
+                                        </div>
+                                        <div class="form-group">
+                                            <button class="form-control btn btn-success btn-block" name="btn_save_attendance" id="btn_save_attendance" disabled="disbaled">Save Attendance</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -57,95 +74,7 @@
                 </section>
              </div>
         </div>
-        <script>
-            console.log("Document Ready");
-            document.getElementById("btn_fetch_students").addEventListener("click", fetchStudents);
-            document.getElementById("btn_save_attendance").addEventListener("click", saveAttendance);
-            document.getElementById("school_year").addEventListener("change", resetStudentList);
-            document.getElementById("staff_subject").addEventListener("change", resetStudentList);
-
-            function resetStudentList() {
-                document.getElementById("student_list").innerHTML = "";
-                document.getElementById("btn_save_attendance").setAttribute("disabled", "disabled");
-            }
-
-            function fetchStudents(e) {
-                e.preventDefault();
-                console.log("fetching students... by userid:" + {{user.id}});
-
-                <!-- Get field values for ajax parameters -->
-                const staff_id = {{user.id}}
-                const subject_id = document.getElementById("staff_subject").value;
-                const school_year_id = document.getElementById("school_year").value;
-
-                <!-- JSON stringify data parameters -->
-                let data = JSON.stringify({'staff_id': staff_id, 'subject_id': subject_id, 'school_year_id': school_year_id});
-
-                const xhr = new XMLHttpRequest()
-                xhr.open("POST", "{% url 'ajax-staff-fetch-students' %}");
-                xhr.setRequestHeader("Content-Type", "application/json");
-                xhr.onload = function() {
-                    const studContainer = document.getElementById("student_list");
-                    if (this.status == 200) {
-                        const students = JSON.parse(this.responseText);
-                        htmlBlock = "<div class='form-group'>";
-                        if (students.length > 0) {
-                            students.forEach(student => {
-                               htmlBlock += "<div class='form-control'><label><input type='checkbox' class='student mr-1' name='student[]' id='student' value='" +
-                               student.pk+"'></input>" + student.fields.first_name+ " " + student.fields.middle_initial + ". " +
-                               student.fields.last_name +"</label></div>";
-                            });
-                            document.getElementById("btn_save_attendance").removeAttribute("disabled", "disabled");
-                        }
-                        else {
-                            htmlBlock += "<p class='bg-warning text-center rounded p-1'>There are no students enrolled on this subject in the selected school year.</p>"
-                        }
-                        htmlBlock += "</div>";
-                        studContainer.innerHTML = htmlBlock;
-                    }
-                    else {
-                        htmlBlock = "<p>Unable to fetch student records.</p>";
-                        studContainer.innerHTML = htmlBlock;
-                    }
-
-                };
-                xhr.send(data);
-            }
-
-            function saveAttendance() {
-                const xhr = new XMLHttpRequest();
-                <!--  Convert NodeList Object to an array to be processed using map function -->
-                const student_list = Array.prototype.slice.call(document.getElementsByName("student[]"));
-                const present_students = student_list.map(function (student) {
-                                                return student.value;
-                                            });
-
-                let id_list = present_students;
-
-                xhr.open("POST", "{% url 'ajax-save-student-attendance' %}");
-                xhr.setRequestHeader("Content-Type", "application/json");
-
-                xhr.onload = function() {
-                    if (this.status == 200) {
-                        console.log("Saving attendance successful");
-                        const status = JSON.parse(this.responseText);
-                        console.log(status.status);
-                    }
-                    else {
-                        console.log("Error: 400");
-                    }
-                    <!--Redirect user to main dashboard for alert message status-->
-                    location.href = "/sms/staff/dashboard/attendance";
-                };
-
-                const subject_id = document.getElementById("staff_subject").value;
-                const school_year = document.getElementById("school_year").value;
-
-                const data = JSON.stringify({'id_list':id_list, 'subject_id':subject_id, 'school_year_id':school_year});
-
-                xhr.send(data);
-            }
-
-        </script>
+        <script>const staff_id = {{user.id}}</script>
+        <script src="{% static 'js/staff.js' %}"></script>
     </body>
 {% endblock %}
