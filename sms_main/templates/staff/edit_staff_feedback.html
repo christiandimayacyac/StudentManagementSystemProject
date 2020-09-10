@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <body class="hold-transition sidebar-mini layout-fixed">
+        <div class="wrapper">
+
+            <!-- Navbar -->
+            {% include 'admin/partials/_navbar.html' %}
+            <!-- /.navbar -->
+
+            <!-- Main Sidebar Container -->
+            {% include 'staff/partials/_staff_main_sidebar.html' %}
+
+             <div class="content-wrapper">
+                <!-- Content Header (Page header) -->
+                {% include 'admin/partials/_main_content_header.html' %}
+
+                <!-- Main content -->
+                <section class="content">
+                    <div class="container-fluid">
+                        <div class="col-md-6">
+                            <div class="card card-primary">
+                              <div class="card-header">
+                                <h3 class="card-title">Feedback Form</h3>
+                              </div>
+                                <div class="card-body">
+                                    {{ form.non_field_errors }}
+                                    {% if form.errors %}
+                                        <div id="form-error">
+                                            <p>The operation could not be performed because one or more error(s) occurred.<br />Please resubmit the form after making the following changes:</p>
+                                            <ul>
+                                            {% for field in form %}
+                                            <li>{{field.label}}-{{ field.errors|striptags }}</li>
+                                            {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                    <form action="" method="POST">
+                                    {% csrf_token %}
+                                        <div class="form-group">
+                                            <input class="form-control" type="hidden" name="staff_id" id="staff_id" value="{{user.id}}">
+                                        </div>
+                                        {% if form.feedback.errors %}
+                                            <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.feedback.errors }}</div>
+                                        {% endif %}
+                                        <div class="form-group">
+                                            <label for="feedback">Feedback Message</label>
+                                            <textarea class="form-control" name="feedback" id="feedback" rows="5" required>{{feedback_obj.feedback}}</textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <button class="form-control btn btn-primary btn-block" name="btn_submit_feedback" id="btn_submit_feedback">Submit</button>
+                                        </div>
+                                        <div class="form-group">
+                                            <a href="{% url 'staff-feedback' %}" class="form-control btn btn-secondary btn-block" name="btn_cancel" id="btn_cancel">Cancel</a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+             </div>
+        </div>
+        <script>const staff_id = {{user.id}}</script>
+        <script src="{% static 'js/staff.js' %}"></script>
+    </body>
+{% endblock %}

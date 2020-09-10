@@ -6,21 +6,25 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core import serializers
 from django.http import request, HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, ListView, CreateView
+from django.views.generic import TemplateView, ListView, CreateView, UpdateView
 
 from .admin_views import custom_message
-from .forms import CreateAttendanceForm, StudForm
+from .forms import CreateAttendanceForm, LeaveApplicationForm, StaffFeedbackForm, StaffEditFeedbackForm
 from .mixins import StaffCheckMixin
 from .models import Attendance, Subject, SchoolYearModel, OfferedSubject, CustomUserProfile, Student, AttendanceReport, \
-    CourseSection
+    CourseSection, LeaveReportStaff, StaffFeedBack
 
 
 class StaffDashboardView(LoginRequiredMixin, StaffCheckMixin, TemplateView):
     template_name = 'staff/staff_dashboard.html'
-    extra_context = {'page_title': 'Staff Dashboard'}
+    extra_context = {
+        'page_title': 'Staff Dashboard',
+        'page_header_title': 'Staff Dashboard'
+    }
 
 
 class CreateStudentAttendanceView(LoginRequiredMixin, StaffCheckMixin, CreateView):
@@ -28,11 +32,15 @@ class CreateStudentAttendanceView(LoginRequiredMixin, StaffCheckMixin, CreateVie
     template_name = 'staff/student_attendance.html'
     form_class = CreateAttendanceForm
     login_url = 'login'
-    success_url = 'staff-dashboard'
+    success_url = reverse_lazy('staff-dashboard')
     school_years = SchoolYearModel.objects.all().order_by('-school_year_end')
     links = {
         'Home': 'staff-dashboard',
         'Student Attendance': ''
+    }
+    extra_context = {
+        'page_title': 'Create Attendance',
+        'page_header_title': 'Create Attendance',
     }
 
     def get_initial(self, *args, **kwargs):
@@ -97,7 +105,8 @@ class StudentAttendanceReport(LoginRequiredMixin, StaffCheckMixin, ListView):
     template_name = 'staff/student_attendance_report.html'
     school_years = SchoolYearModel.objects.all().order_by('-school_year_end')
     extra_context = {
-        'page_title': 'Staff Dashboard',
+        'page_title': 'Student Attendance Report',
+        'page_header_title': 'Student Attendance Report',
         'school_years_obj': school_years,
     }
 
@@ -280,3 +289,80 @@ class AjaxUpdateAttendance(View):
 
         custom_message(self.request, "Attendance Report has been updated successfully","success")
         return JsonResponse({"success": True, "method": self.request.method, "is_ajax": self.request.is_ajax()})
+
+
+class LeaveApplicationView(LoginRequiredMixin, StaffCheckMixin, CreateView):
+    model = LeaveReportStaff
+    template_name = "staff/leave_application.html"
+    form_class = LeaveApplicationForm
+    success_url = reverse_lazy('staff-leave-report')
+    extra_context = {
+        'page_title': 'Leave Application',
+        'page_header_title': 'Leave Application'
+    }
+
+    def form_valid(self, form):
+        custom_message(self.request, 'Application for leave is sent successfully.', "success")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        custom_message(self.request, 'Unable to apply for leave.', "error")
+        return super().form_invalid(form)
+
+
+class LeaveReportView(LoginRequiredMixin, StaffCheckMixin, ListView):
+    model = LeaveReportStaff
+    context_object_name = 'leave_report_obj'
+    template_name = "staff/leave_report.html"
+    extra_context = {
+        'page_title': 'Leave Report',
+        'page_header_title': 'Leave Report'
+    }
+
+
+class StaffFeedBackView(LoginRequiredMixin, StaffCheckMixin, CreateView):
+    model = StaffFeedBack
+    template_name = 'staff/staff_feedback.html'
+    form_class = StaffFeedbackForm
+    success_url = reverse_lazy('staff-feedback')
+    extra_context = {
+        'page_title': 'Feedback',
+        'page_header_title': 'Feedback Form'
+    }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        staff_id = self.request.user.staff.id
+        context["feedback_obj"] = StaffFeedBack.objects.filter(staff_id=staff_id)
+        return context
+
+    def form_valid(self, form):
+        custom_message(self.request, 'Feedback is sent successfully.', "success")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        custom_message(self.request, 'Unable to send feedback.', "error")
+        return super().form_invalid(form)
+
+
+class StaffEditFeedBackView(LoginRequiredMixin, StaffCheckMixin, UpdateView):
+    model = StaffFeedBack
+    form_class = StaffEditFeedbackForm
+    context_object_name = 'feedback_obj'
+    template_name = 'staff/edit_staff_feedback.html'
+    extra_context = {
+        'page_title': 'Edit Feedback',
+        'page_header_title': 'Edit Feedback'
+    }
+
+    def get_object(self):
+        feedback_id = self.kwargs.get('id')
+        return get_object_or_404(StaffFeedBack, id=feedback_id)
+
+    def form_valid(self, form):
+        custom_message(self.request, 'Feedback has been updated.', "success")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        custom_message(self.request, 'Unable to edit feedback.', "error")
+        return super().form_invalid(form)

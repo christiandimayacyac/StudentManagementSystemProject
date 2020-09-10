@@ -47,6 +47,10 @@ urlpatterns = [
     path('staff/students/fetch/', staff_views.AjaxFetchStudents.as_view(), name='ajax-staff-fetch-students'),
     path('admin/section/fetch/', staff_views.AjaxFetchSections.as_view(), name='ajax-admin-fetch-sections'),
     path('staff/section/fetch/', staff_views.AjaxFetchSections.as_view(), name='ajax-staff-fetch-sections'),
+    path('staff/leave/', staff_views.LeaveApplicationView.as_view(), name='staff-leave-application'),
+    path('staff/leave/report', staff_views.LeaveReportView.as_view(), name='staff-leave-report'),
+    path('staff/leave/feedback', staff_views.StaffFeedBackView.as_view(), name='staff-feedback'),
+    path('staff/leave/feedback/edit/<int:id>', staff_views.StaffEditFeedBackView.as_view(), name='staff-edit-feedback'),
     path('student/dashboard/', student_views.StudentDashboardView.as_view(), name='student-dashboard'),
 
 ]

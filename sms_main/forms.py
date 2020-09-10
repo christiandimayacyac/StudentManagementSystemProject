@@ -258,7 +258,7 @@ class AddSchoolYearForm(forms.ModelForm):
 
 
 class CreateAttendanceForm(forms.ModelForm):
-    students = forms.MultipleChoiceField(required=False,widget=forms.CheckboxSelectMultiple(), choices=[])
+    students = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple(), choices=[])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -431,21 +431,91 @@ class EditSchoolYearForm(forms.ModelForm):
         fields = '__all__'
 
 
-class DynamicMultipleChoiceField(forms.MultipleChoiceField):
-    def validate(self, value):
-        if self.required and not value:
-            raise ValidationError(self.error_messages['required'])
+# class DynamicMultipleChoiceField(forms.MultipleChoiceField):
+#     def validate(self, value):
+#         if self.required and not value:
+#             raise ValidationError(self.error_messages['required'])
 
 
-class StudForm(forms.Form):
-    students = DynamicMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), choices=[])
+# class StudForm(forms.Form):
+#     students = DynamicMultipleChoiceField(widget=forms.CheckboxSelectMultiple(), choices=[])
+#
+#     def filter_students(self, data):
+#         students_obj = get_user_model().objects.filter(student__subjects__staff_id=data['staff_id'],
+#                                                        student__subjects__id=data['subject_id'],
+#                                                        student__school_year__id=data['school_year_id'])
+#         self.fields['students'].choices = [(student.pk, student.first_name) for student in students_obj]
+#         print("printing choices")
+#         print(self.fields['students'].choices)
 
-    def filter_students(self, data):
-        students_obj = get_user_model().objects.filter(student__subjects__staff_id=data['staff_id'],
-                                                       student__subjects__id=data['subject_id'],
-                                                       student__school_year__id=data['school_year_id'])
-        self.fields['students'].choices = [(student.pk, student.first_name) for student in students_obj]
-        print("printing choices")
-        print(self.fields['students'].choices)
+
+class LeaveApplicationForm(forms.ModelForm):
+    staff_id = forms.IntegerField(widget=forms.TextInput())
+
+    class Meta:
+        model = LeaveReportStaff
+        fields = (
+            'staff_id',
+            'leave_date',
+            'leave_message'
+        )
+        exclude = ['leave_status']
+
+    def clean(self, *args, **kwargs):
+        print("cleaning all")
+        cleaned_data = super(LeaveApplicationForm, self).clean()
+        leave_date = self.cleaned_data['leave_date']
+        staff_id = self.cleaned_data['staff_id']
+        if LeaveReportStaff.objects.filter(staff_id=staff_id, leave_date=leave_date):
+            raise ValidationError(_('There is already an existing application on the selected date.'))
+        return cleaned_data
+
+    def clean_staff_id(self, *args, **kwargs):
+        print("cleaning staff id")
+        staff_id = self.cleaned_data['staff_id']
+        s_id = Staff.objects.get(user_profile=staff_id)
+        if not s_id:
+            return ValidationError(_('Invalid staff.'), code='Invalid')
+        return s_id
 
 
+class StaffFeedbackForm(forms.ModelForm):
+    staff_id = forms.IntegerField(widget=forms.TextInput())
+    class Meta:
+        model = StaffFeedBack
+        fields = (
+            'staff_id',
+            'feedback'
+        )
+
+    def clean_staff_id(self, *args, **kwargs):
+        print("cleaning staff id")
+        staff_id = self.cleaned_data['staff_id']
+        s_id = Staff.objects.get(user_profile=staff_id)
+        if not s_id:
+            return ValidationError(_('Invalid staff.'), code='Invalid')
+        return s_id
+
+
+class StaffEditFeedbackForm(forms.ModelForm):
+    staff_id = forms.IntegerField(widget=forms.TextInput())
+
+    class Meta:
+        model = StaffFeedBack
+        fields = (
+            'staff_id',
+            'feedback'
+        )
+
+    def clean_staff_id(self, *args, **kwargs):
+        print("cleaning staff id")
+        staff_id = self.cleaned_data['staff_id']
+        s_id = Staff.objects.get(user_profile=staff_id)
+        if not s_id:
+            return ValidationError(_('Invalid staff.'), code='Invalid')
+        return s_id
+
+
+    def clean_feedback(self, *args, **kwargs):
+        print("cleaning feedback message")
+        return self.cleaned_data['feedback']

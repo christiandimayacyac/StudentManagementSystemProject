@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+    {% block content %}
+        <body class="hold-transition sidebar-mini layout-fixed">
+            <div class="wrapper">
+
+            <!-- Navbar -->
+            {% include 'admin/partials/_navbar.html' %}
+            <!-- /.navbar -->
+
+            <!-- Main Sidebar Container -->
+            {% include 'staff/partials/_staff_main_sidebar.html' %}
+
+             <div class="content-wrapper">
+                <!-- Content Header (Page header) -->
+                {% include 'admin/partials/_main_content_header.html' %}
+
+                <!-- Main content -->
+                <section class="content">
+                    <div class="container-fluid">
+                        <div class="col-md-12">
+                            <!-- general form elements -->
+                                <div class="card">
+                                  <div class="card-header bg-warning">
+                                    <h3 class="card-title">Leave Report History</h3>
+                                  </div>
+                                  <!-- /.card-header -->
+                                  <div class="card-body table-responsive p-0" style="height: 65vh;">
+                                    <table class="table table-head-fixed text-nowrap table-striped">
+                                      <thead>
+                                        <tr>
+                                          <th>ID</th>
+                                          <th>Leave Date</th>
+                                          <th>Leave Message</th>
+                                          <th>Leave Status</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {% for report in leave_report_obj %}
+                                            <tr>
+                                              <td>{{report.id}}</td>
+                                              <td>{{report.leave_date}}</td>
+                                              <td>{{report.leave_message}}</td>
+                                              <td>
+                                                  {% if report.leave_status == 0 %}
+                                                    <span class="text-secondary ">Pending</span>
+                                                  {% elif report.leave_status == 1 %}
+                                                    <span class="text-success">Approved</span>
+                                                  {% else %}
+                                                    <span class="text-danger">Rejected</span>
+                                                  {% endif %}
+                                              </td>
+                                            </tr>
+                                        {% endfor %}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                  <!-- /.card-body -->
+                                </div>
+                            <!-- /.card -->
+                        </div>
+                    </div><!-- /.container-fluid -->
+                </section>
+            </div>
+            </div>
+        </body>
+    {% endblock %}

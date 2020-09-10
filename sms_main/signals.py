@@ -7,9 +7,7 @@ from .models import CustomUserProfile, AdminHOD, Staff, Student, Course, Attenda
 
 @receiver(post_save, sender=CustomUserProfile)
 def create_user_profile(sender, instance, created, **kwargs):
-    print("signals.py - created1")
     if created:
-        print("signals.py - created2")
         # Get instance attributes from the admin_views.py
         gender = getattr(instance, '_gender', None)
         address = getattr(instance, '_address', None)
