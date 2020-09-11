@@ -1,10 +1,4 @@
-{% include 'sms_main/partials/_login_reg_header.html' %}
-<body class="hold-transition login-page">
-<div class="login-box">
-  <div class="login-logo">
-    <a href="{% url 'demo' %}">Student Management System v1</a>
-  </div>
-  <!-- /.login-logo -->
+{% include 'registration/partials/_login_reg_header.html' %}
   <div class="card">
     <div class="card-header bg-primary">
       <p id="login-title" class="mb-0 text-center">Admin Login</p>
@@ -51,7 +45,7 @@
         </div>
       </form>
       <p class="mb-1">
-        <a href="forgot-password.html">I forgot my password</a>
+        <a href="{% url 'password_reset' %}">I forgot my password</a>
       </p>
       <p class="mb-0">
         <a href="{% url 'register' %}" class="text-center">Register a new membership</a>
@@ -67,6 +61,6 @@
   </ul>
 </div>
 <!-- /.login-box -->
-{% include 'sms_main/partials/_login_reg_footer.html' %}
+{% include 'registration/partials/_login_reg_footer.html' %}
 
 

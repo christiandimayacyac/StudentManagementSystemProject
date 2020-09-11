@@ -125,3 +125,8 @@ LOGOUT_REDIRECT_URL = 'login'
 MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
+
+# TEMPORARY EMAIL BACKEND THAT SAVES EMAIL TO A FILE
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
