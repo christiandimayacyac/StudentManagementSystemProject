@@ -58,12 +58,12 @@ class AddStaffView(LoginRequiredMixin, AdminCheckMixin, CreateView):
     form_class = RegisterStaffForm
     success_url = reverse_lazy('admin-dashboard')
     links = {
-        'page_title': 'Add Staff',
         'Home': 'admin-dashboard',
         'Add Staff': ''
     }
 
     extra_context = {
+        'page_title': 'Add Staff',
         'page_header_title': 'Add Staff',
         'breadcrumbs': OrderedDict(links.items())
     }

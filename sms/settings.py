@@ -127,6 +127,13 @@ MESSAGE_TAGS = {
 }
 
 # TEMPORARY EMAIL BACKEND THAT SAVES EMAIL TO A FILE
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+# EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+# EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
+# GMAIL EMAIL BACKEND
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "christian@gmail.com"
+EMAIL_HOST_PASSWORD = "enter your password here"
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "ZIEMDI <christian@gmail.com>"
