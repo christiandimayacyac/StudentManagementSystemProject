@@ -1,6 +1,7 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 
 
 class UserRedirectMixin:
@@ -53,5 +54,6 @@ class StudentCheckMixin(UserPassesTestMixin, UserRedirectMixin):
 
         redirect_path = self.get_next_url()
         return redirect(redirect_path)
+
 
 

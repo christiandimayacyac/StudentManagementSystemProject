@@ -8,19 +8,19 @@ from .models import CustomUserProfile, AdminHOD, Staff, Student, Course, Attenda
 @receiver(post_save, sender=CustomUserProfile)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        # Get instance attributes from the admin_views.py
-        gender = getattr(instance, '_gender', None)
-        address = getattr(instance, '_address', None)
-        course_id = getattr(instance, '_course_id', None)
-        school_year = getattr(instance, '_school_year', None)
-        year_level = getattr(instance, '_year_level', None)
-        section = getattr(instance, '_section', None)
-
         if instance.user_level == 1:
             AdminHOD.objects.create(user_profile=instance)
         if instance.user_level == 2:
             Staff.objects.create(user_profile=instance)
         if instance.user_level == 3:
+            # Get instance attributes from the admin_views.py
+            gender = getattr(instance, '_gender', None)
+            address = getattr(instance, '_address', None)
+            course_id = getattr(instance, '_course_id', None)
+            school_year = getattr(instance, '_school_year', None)
+            year_level = getattr(instance, '_year_level', None)
+            section = getattr(instance, '_section', None)
+
             Student.objects.create(user_profile=instance,
                                    gender=gender, address=address,
                                    school_year=school_year,

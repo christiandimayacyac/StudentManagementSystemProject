@@ -65,6 +65,7 @@ class CreateStudentAttendanceView(LoginRequiredMixin, StaffCheckMixin, CreateVie
             subject_id__staff_id=self.request.user.id
         ).only('id')
 
+        is_error = False
         if not existing_attendance:
             # Create a new Attendance Entry
             subject = get_object_or_404(Subject, pk=subject.id)
@@ -81,17 +82,22 @@ class CreateStudentAttendanceView(LoginRequiredMixin, StaffCheckMixin, CreateVie
                         # Create an instance property for signal reference to create AttendanceReport Entry
                         new_attendance._student_id = student
                         new_attendance.save()
-                        custom_message(self.request, 'Attendance has been created.', "success")
+                        # custom_message(self.request, 'Attendance has been created.', "success")
                     except:
-                        custom_message(self.request, "There's an error in saving the attendance.", "error")
+                        # custom_message(self.request, "There's an error in saving the attendance.", "error")
+                        is_error = True
                         break
             else:
                 new_attendance._student_id = False
                 new_attendance.save()
-                custom_message(self.request, 'Attendance has been created.', "success")
         else:
             custom_message(self.request, "An attendance for this subject today already exists.", "error")
+            return redirect(self.success_url)
 
+        if not is_error:
+            custom_message(self.request, 'Attendance has been created.', "success")
+        else:
+            custom_message(self.request, "There's an error in saving the attendance.", "error")
         return redirect(self.success_url)
 
     def form_invalid(self, form):

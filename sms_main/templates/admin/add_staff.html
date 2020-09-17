@@ -53,7 +53,8 @@
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.email.errors }}</div>
                                     {% endif %}
                                   <div class="form-group">
-                                    <input type="email" class="form-control" name="email" placeholder="Enter email" value="{{form.email.value|default:''}}" required>
+                                    <input type="email" class="form-control" name="email" id="email" placeholder="Enter email" value="{{form.email.value|default:''}}" required>
+                                    <small id="email_stat" class="email_stat ml-3 d-none"></small>
                                   </div>
                                     {% if form.user_level.errors %}
                                       <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.user_level.errors }}</div>
@@ -103,5 +104,6 @@
                 </section>
             </div>
             </div>
+            <script src="{% static 'js/admin.js' %}"></script>
         </body>
     {% endblock %}

@@ -83,8 +83,8 @@
               </a>
             </li>
             <li class="nav-item">
-              {% url 'view-staff-feedback' as view_staff_feedback %}
-              <a href="{{view_staff_feedback}}" class="nav-link {% if request.path == view_staff_feedback %}active{% endif %}">
+              {% url 'view-staff-feedbacks' as view_staff_feedbacks %}
+              <a href="{{view_staff_feedbacks}}" class="nav-link {% if request.path == view_staff_feedbacks %}active{% endif %}">
                 <i class="far fa-circle nav-icon"></i>
                 <p>View Feedbacks</p>
               </a>

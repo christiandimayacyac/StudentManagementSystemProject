@@ -190,7 +190,9 @@ class CourseSection(models.Model):
 
 
 class Student(models.Model):
-    levels = {'I': 'First Year',
+    levels = {
+              '': '-Select Year Level-',
+              'I': 'First Year',
               'II': 'Second Year',
               'III': 'Third Year',
               'IV': ' Fourth Year',
@@ -199,6 +201,7 @@ class Student(models.Model):
               }
 
     class Levels(models.TextChoices):
+        SELECT = '', _('-Select Year Level-')
         FIRSTYEAR = 'I', _('First Year')
         SECONDYEARYEAR = 'II', _('Second Year')
         THIRDYEAR = 'III', _('Third Year')
@@ -210,6 +213,7 @@ class Student(models.Model):
         REGULAR = 'R', _('Regular')
         IRREGULAR = 'I', _('Irregular')
         GRADUATE = 'G', _('Graduate')
+        DROPPED = 'D', _('DROPPED')
 
     user_profile = models.OneToOneField(CustomUserProfile, on_delete=models.CASCADE)
     gender = models.CharField(default="M", max_length=255, blank=False, null=False)

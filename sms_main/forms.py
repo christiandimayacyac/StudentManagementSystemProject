@@ -55,11 +55,11 @@ class LoginForm(AuthenticationForm):
 
             if not user:
                 messages.error(self.request, 'Invalid username or password')
-                raise forms.ValidationError('Invalid username or password')
+                raise ValidationError(_('Invalid username or password'), code='invalid')
             elif not str(user_level) == str(user.user_level):
                 print("User level mismatch")
                 messages.error(self.request, 'Invalid login')
-                raise forms.ValidationError('Invalid Login')
+                raise ValidationError(_('Invalid Login'), code='invalid')
 
         return super(LoginForm, self).clean(*args, **kwargs)
 
@@ -134,42 +134,60 @@ class ModifiedSectionChoiceField(forms.ModelChoiceField):
 
 
 class RegisterStudentForm(RegistrationForm):
-    gender = forms.CharField(max_length=1, widget=forms.Select())
-    year_level = forms.CharField(max_length=3, widget=forms.Select(), empty_value="Select a Year Level")
+    gender = forms.CharField(max_length=1)
+    year_level = forms.CharField(max_length=3)
     stat = forms.CharField(max_length=1, widget=forms.Select(), empty_value="Select Student Status")
     section = ModifiedSectionChoiceField(
         queryset=CourseSection.objects.all().order_by('-section_name'),
         to_field_name='id',
-        empty_label='-Select a Section-'
+        empty_label='-Select a Section-',
+        required=True,
     )
     address = forms.CharField(max_length=255, widget=forms.TextInput())
     course_id = ModifiedCourseChoiceField(
         queryset=Course.objects.all().order_by('course_name'),
         to_field_name='id',
         empty_label='-Select a Course-',
+        required=True
     )
     subject_choices = Subject.objects.all()
     subject_list = forms.ModelMultipleChoiceField(queryset=subject_choices, widget=forms.CheckboxSelectMultiple)
     school_year = ModifiedSchoolYearChoiceField(
         queryset=SchoolYearModel.objects.all().order_by('id'),
         to_field_name='id',
-        empty_label='Select a School Year',
+        empty_label='-Select a School Year-',
+        required=True
     )
+
+    # Override the default value of the user_level from 1 to 3
+    def __init__(self, *args, **kwargs):
+        super(RegisterStudentForm, self).__init__(*args, **kwargs)
+        gender_options = (('', '-Select a Gender-'), ('M', 'Male'), ('F', 'Female'))
+
+        self.fields['user_level'].initial = 3
+        self.fields['course_id'].widget.attrs['class'] = "form-control"
+        self.fields['course_id'].widget.attrs['id'] = "course_id"
+        self.fields['school_year'].widget.attrs['class'] = "form-control"
+        self.fields['year_level'] = forms.ChoiceField(
+            choices=Student.Levels.choices,
+            initial='',
+            widget=forms.Select(attrs={'class': 'form-control'}),
+            required=True
+        )
+        self.fields['gender'] = forms.ChoiceField(
+            choices=gender_options,
+            initial='',
+            widget=forms.Select(attrs={'class': 'form-control'}),
+            required=True
+        )
+
+        self.fields['stat'].choices = Student.Status.choices
 
     def clean_address(self):
         data = self.cleaned_data['address']
         if data == '':
             data = 'Unspecified'
         return data
-
-    # Override the default value of the user_level from 1 to 3
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['user_level'].initial = 3
-        self.fields['course_id'].widget.attrs['class'] = "form-control"
-        self.fields['gender'].choices = (('', '-Select a Gender-'), ('M', 'Male'), ('F', 'Female'))
-        self.fields['year_level'].choices = Student.Levels.choices
-        self.fields['stat'].choices = Student.Status.choices
 
     class Meta:
         model = get_user_model()
@@ -208,12 +226,6 @@ class AddCourseForm(forms.ModelForm):
 
 
 class AddSubjectForm(forms.ModelForm):
-    # course_id = ModifiedCourseChoiceField(
-    #     queryset=Course.objects.all().order_by('course_name'),
-    #     # queryset=Course.objects.all(),
-    #     to_field_name='id',
-    #     empty_label='Select a Course',
-    # )
 
     course_id = forms.ModelChoiceField(
         get_course_set()
@@ -236,7 +248,9 @@ class AddSubjectForm(forms.ModelForm):
         new_subject_name = cleaned_data['subject_name']
         staff = cleaned_data['staff_id']
         course = cleaned_data['course_id']
-        if Subject.objects.filter(subject_name=new_subject_name, staff_id=staff, course_id=course).exists() or Subject.objects.filter(subject_name=new_subject_name, course_id=course).exists():
+        if Subject.objects.filter(subject_name=new_subject_name, staff_id=staff,
+                                  course_id=course).exists() or Subject.objects.filter(subject_name=new_subject_name,
+                                                                                       course_id=course).exists():
             raise forms.ValidationError(_('Subject already exists'))
 
         return cleaned_data
@@ -250,6 +264,13 @@ class AddSectionForm(forms.ModelForm):
             'course_id'
         )
 
+    def clean_section_name(self, *args, **kwargs):
+        section_name = self.cleaned_data['section_name']
+        section_exists = CourseSection.objects.filter(section_name=section_name).exists()
+        if section_exists:
+            raise ValidationError(_('The section name already exists in the database.'), code='invalid')
+        return section_name
+
 
 class AddSchoolYearForm(forms.ModelForm):
     class Meta:
@@ -262,7 +283,8 @@ class CreateAttendanceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        student_choices = [(entry.user_profile.id, entry.user_profile.first_name) for entry in Student.objects.all().only('id', 'user_profile')]
+        student_choices = [(entry.user_profile.id, entry.user_profile.first_name) for entry in
+                           Student.objects.all().only('id', 'user_profile')]
         print('student_choices')
         print(student_choices)
         self.fields['students'].choices = student_choices
@@ -350,11 +372,6 @@ class EditStaffForm(forms.ModelForm):
 class EditStudentForm(forms.ModelForm):
     gender = forms.CharField(max_length=1)
     address = forms.CharField()
-    # course_id = ModifiedCourseChoiceField(
-    #     queryset=Course.objects.all().order_by('course_name'),
-    #     to_field_name='id',
-    #     empty_label='Select a Course',
-    # )
     course_id = forms.ModelChoiceField(
         get_course_set()
     )
@@ -467,7 +484,7 @@ class LeaveApplicationForm(forms.ModelForm):
         leave_date = self.cleaned_data['leave_date']
         staff_id = self.cleaned_data['staff_id']
         if LeaveReportStaff.objects.filter(staff_id=staff_id, leave_date=leave_date):
-            raise ValidationError(_('There is already an existing application on the selected date.'))
+            raise ValidationError(_('There is already an existing application on the selected date.'), code='invalid')
         return cleaned_data
 
     def clean_staff_id(self, *args, **kwargs):
@@ -475,12 +492,13 @@ class LeaveApplicationForm(forms.ModelForm):
         staff_id = self.cleaned_data['staff_id']
         s_id = Staff.objects.get(user_profile=staff_id)
         if not s_id:
-            return ValidationError(_('Invalid staff.'), code='Invalid')
+            return ValidationError(_('Invalid staff.'), code='invalid')
         return s_id
 
 
 class StaffFeedbackForm(forms.ModelForm):
     staff_id = forms.IntegerField(widget=forms.TextInput())
+
     class Meta:
         model = StaffFeedBack
         fields = (
@@ -493,7 +511,7 @@ class StaffFeedbackForm(forms.ModelForm):
         staff_id = self.cleaned_data['staff_id']
         s_id = Staff.objects.get(user_profile=staff_id)
         if not s_id:
-            return ValidationError(_('Invalid staff.'), code='Invalid')
+            return ValidationError(_('Invalid staff.'), code='invalid')
         return s_id
 
 
@@ -512,9 +530,8 @@ class StaffEditFeedbackForm(forms.ModelForm):
         staff_id = self.cleaned_data['staff_id']
         s_id = Staff.objects.get(user_profile=staff_id)
         if not s_id:
-            return ValidationError(_('Invalid staff.'), code='Invalid')
+            return ValidationError(_('Invalid staff.'), code='invalid')
         return s_id
-
 
     def clean_feedback(self, *args, **kwargs):
         print("cleaning feedback message")

@@ -1,10 +1,13 @@
 import json
+import datetime
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages import get_messages
 from django.core import serializers
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import models
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -18,7 +21,8 @@ from .forms import RegisterStaffForm, RegisterStudentForm, AddCourseForm, AddSub
     ManageStudentsForm, ManageSubjectsForm, ManageCoursesForm, EditStaffForm, EditStudentForm, EditSubjectForm, \
     AddSchoolYearForm, EditCourseForm, EditSchoolYearForm, AddSectionForm
 from .mixins import AdminCheckMixin
-from .models import Course, Subject, CustomUserProfile, Staff, Student, SchoolYearModel, OfferedSubject, CourseSection
+from .models import Course, Subject, CustomUserProfile, Staff, Student, SchoolYearModel, OfferedSubject, CourseSection, \
+    StaffFeedBack
 from collections import OrderedDict
 
 
@@ -27,19 +31,26 @@ def custom_message(request, msg, msg_tag):
     Just add the message once
     :param request:
     :param msg:
+    :param msg_tag:
     :return:
     """
     if msg not in [m.message for m in get_messages(request)]:
         if msg_tag == "success":
             messages.success(request, msg)
+            return
         if msg_tag == "error":
             messages.error(request, msg)
+            return
         if msg_tag == "warning":
             messages.warning(request, msg)
+            return
         if msg_tag == "info":
             messages.info(request, msg)
+            return
         if msg_tag == "debug":
             messages.debug(request, msg)
+            return
+
 
 class AdminDashboardView(LoginRequiredMixin, AdminCheckMixin, TemplateView):
     template_name = 'admin/admin_dashboard.html'
@@ -48,7 +59,7 @@ class AdminDashboardView(LoginRequiredMixin, AdminCheckMixin, TemplateView):
     extra_context = {
         'page_title': 'Admin Dashboard',
         'page_header_title': 'Admin Dashboard',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
 
@@ -65,7 +76,7 @@ class AddStaffView(LoginRequiredMixin, AdminCheckMixin, CreateView):
     extra_context = {
         'page_title': 'Add Staff',
         'page_header_title': 'Add Staff',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def form_valid(self, form):
@@ -87,7 +98,6 @@ class AddStudentView(LoginRequiredMixin, AdminCheckMixin, CreateView):
     model = get_user_model()
     form_class = RegisterStudentForm
     success_url = reverse_lazy('admin-dashboard')
-
     school_year = SchoolYearModel.objects.all()
     links = {
         'Home': 'admin-dashboard',
@@ -97,11 +107,10 @@ class AddStudentView(LoginRequiredMixin, AdminCheckMixin, CreateView):
         'page_header_title': 'Add Student',
         'school_year': school_year,
         'default_pic': '/media/default.png',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def form_valid(self, form):
-        print("Student info valid")
         user = form.save(commit=False)
         # Set instance attributes to be used by the signal for saving extra details in the Student Model
         user._gender = form.cleaned_data.get('gender')
@@ -110,15 +119,7 @@ class AddStudentView(LoginRequiredMixin, AdminCheckMixin, CreateView):
         user._course_id = form.cleaned_data.get('course_id')
         user._year_level = form.cleaned_data.get('year_level')
         user._section = form.cleaned_data.get('section')
-
-
-
         user.save()
-
-        print('user')
-        print(user)
-        print(user.id)
-        print(user.student.id)
 
         # Make an entry for subjects enrolled by the student
         for subject in form.cleaned_data.get('subject_list'):
@@ -130,8 +131,6 @@ class AddStudentView(LoginRequiredMixin, AdminCheckMixin, CreateView):
         return super(AddStudentView, self).form_valid(form)
 
     def form_invalid(self, form):
-        print("Student info invalid")
-        print(form.cleaned_data)
         custom_message(self.request, "Student Registration Failed", "error")
         return super(AddStudentView, self).form_invalid(form)
 
@@ -147,7 +146,7 @@ class AddCourseView(LoginRequiredMixin, AdminCheckMixin, CreateView):
     }
     extra_context = {
         'page_header_title': 'Addsubject Course',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def form_valid(self, form):
@@ -170,7 +169,7 @@ class AddSubjectView(LoginRequiredMixin, AdminCheckMixin, CreateView):
     }
     extra_context = {
         'page_header_title': 'Add Subject',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def form_valid(self, form):
@@ -195,7 +194,7 @@ class AddSectionView(CreateView):
     extra_context = {
         'page_header_title': 'Add Section',
         'courses_obj': courses,
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def form_valid(self, form):
@@ -218,7 +217,7 @@ class AddSchoolYearView(LoginRequiredMixin, AdminCheckMixin, CreateView):
     }
     extra_context = {
         'page_header_title': 'Add School Year',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def form_valid(self, form):
@@ -241,7 +240,7 @@ class ManageSchoolYearView(LoginRequiredMixin, AdminCheckMixin, ListView):
     }
     extra_context = {
         'page_header_title': 'Manage School Year',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
 
@@ -256,7 +255,7 @@ class ManageStaffView(LoginRequiredMixin, AdminCheckMixin, ListView):
     }
     extra_context = {
         'page_header_title': 'Manage Staff',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
 
@@ -271,7 +270,7 @@ class ManageStudentsView(LoginRequiredMixin, AdminCheckMixin, ListView):
     }
     extra_context = {
         'page_header_title': 'Manage Students',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
 
@@ -286,7 +285,7 @@ class ManageSubjectsView(LoginRequiredMixin, AdminCheckMixin, ListView):
     }
     extra_context = {
         'page_header_title': 'Manage Subjects',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
 
@@ -301,7 +300,7 @@ class ManageCoursesView(LoginRequiredMixin, AdminCheckMixin, ListView):
     }
     extra_context = {
         'page_header_title': 'Manage Courses',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
 
@@ -317,7 +316,7 @@ class EditStaffView(LoginRequiredMixin, AdminCheckMixin, UpdateView):
     }
     extra_context = {
         'page_header_title': 'Edit Staff',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self):
@@ -347,7 +346,7 @@ class EditStudentView(LoginRequiredMixin, AdminCheckMixin, UpdateView):
         'page_header_title': 'Edit Student',
         'course_obj': Course.objects.all().order_by('course_name'),
         'school_year_obj': SchoolYearModel.objects.all().order_by('-id'),
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self):
@@ -385,7 +384,7 @@ class EditSubjectView(LoginRequiredMixin, AdminCheckMixin, UpdateView):
     extra_context = {
         'course_obj': Course.objects.all(),
         'staff_obj': CustomUserProfile.objects.filter(user_level=2),
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self, queryset=None):
@@ -393,15 +392,12 @@ class EditSubjectView(LoginRequiredMixin, AdminCheckMixin, UpdateView):
         return get_object_or_404(Subject, id=subject_id)
 
     def form_valid(self, form):
-        print("valid")
-        print(form.cleaned_data)
         subject = form.save()
         subject.save()
         custom_message(self.request, "Subject Update Successful", "succes")
         return super(EditSubjectView, self).form_valid(form)
 
     def form_invalid(self, form):
-        print("invalid")
         messages.error(self.request, "Subject Update Failed", "error")
         return super(EditSubjectView, self).form_valid(form)
 
@@ -418,7 +414,7 @@ class EditCourseView(LoginRequiredMixin, AdminCheckMixin, UpdateView):
     }
     extra_context = {
         'page-header-title': 'Edit Course',
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self, queryset=None):
@@ -447,7 +443,7 @@ class EditSchoolYearView(LoginRequiredMixin, AdminCheckMixin, UpdateView):
         'Edit School Year': ''
     }
     extra_context = {
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self, queryset=None):
@@ -477,7 +473,7 @@ class DeleteStudentView(LoginRequiredMixin, AdminCheckMixin, DeleteView):
         'Delete Student': ''
     }
     extra_context = {
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self, queryset=None):
@@ -497,7 +493,7 @@ class DeleteSubjectView(LoginRequiredMixin, AdminCheckMixin, DeleteView):
         'Delete Subject': ''
     }
     extra_context = {
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self, queryset=None):
@@ -518,7 +514,7 @@ class DeleteCourseView(LoginRequiredMixin, AdminCheckMixin, DeleteView):
         'Delete Course': ''
     }
     extra_context = {
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self, queryset=None):
@@ -557,7 +553,7 @@ class DeleteStaffView(LoginRequiredMixin, AdminCheckMixin, DeleteView):
         'Delete Staff': ''
     }
     extra_context = {
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self, queryset=None):
@@ -577,12 +573,54 @@ class DeleteSchoolYearView(LoginRequiredMixin, AdminCheckMixin, DeleteView):
         'Delete School Year': ''
     }
     extra_context = {
-        'breadcrumbs': OrderedDict(links.items())
+        'breadcrumbs': OrderedDict(links)
     }
 
     def get_object(self, queryset=None):
         sy_id = self.kwargs.get('id')
         return get_object_or_404(SchoolYearModel, id=sy_id)
+
+
+class ViewFeedbacks(LoginRequiredMixin, AdminCheckMixin, ListView):
+    model = StaffFeedBack
+    template_name = 'admin/view_feedbacks.html'
+    context_object_name = 'feedback_obj'
+
+    links = {
+        'Home': 'admin-dashboard',
+        'Staff Feedbacks': ''
+    }
+    extra_context = {
+        'breadcrumbs': OrderedDict(links)
+    }
+
+
+class AjaxFeedbackReply(View):
+    model = StaffFeedBack
+    template_name = 'admin/feedback_reply.html'
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(AjaxFeedbackReply, self).dispatch(request, *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        if self.request.method == "POST":
+            # body_unicode = self.request.body.decode('utf-8') decode is only used in python 3.5below
+            body_unicode = self.request.body
+            body = json.loads(body_unicode)
+            fid = int(body['fid'])
+            msg = body['msg']
+            cur_date_time = datetime.datetime.now()
+            try:
+                feedback = StaffFeedBack.objects.get(pk=fid)
+                feedback.feedback_reply = msg + " [" + cur_date_time.strftime("%x") + "]"
+                feedback.save()
+                custom_message(self.request, "Reply sent.", "success")
+            except:
+                custom_message(self.request, "Unable to send reply.", "error")
+                return JsonResponse({"replyStatus": fid, "msg": msg, "status": False})
+
+        return JsonResponse({"replyStatus": fid, "msg": msg, "status": True})
 
 
 class AjaxGetSubjects(View):
@@ -606,8 +644,40 @@ class AjaxGetSubjects(View):
                 data = serializers.serialize('json', course_subjects, fields=('id', 'subject_name'))
             return HttpResponse(data, content_type="application/json")
         else:
-            return JsonResponse({"success": False, "method": self.request.method, "is_ajax": self.request.is_ajax()}, status=400)
+            return JsonResponse({"success": False, "method": self.request.method, "is_ajax": self.request.is_ajax()},
+                                status=400)
 
 
-class AjaxAssignSubjects(CreateView):
-    pass
+class AjaxCheckEmailDuplicate(View):
+    model = get_user_model()
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(AjaxCheckEmailDuplicate, self).dispatch(request, *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        if self.request.method == "POST":
+            # body_unicode = self.request.body.decode('utf-8') decode is only used in python 3.5below
+            body_unicode = self.request.body
+            body = json.loads(body_unicode)
+            email = body['email']
+
+            valid_email = False
+            duplicate = False
+            if email:
+                try:
+                    validate_email(email)
+                    valid_email = True
+                    obj = get_user_model().objects.filter(email=email).exists()
+
+                    if obj:
+                        duplicate = True
+                    return JsonResponse({"validEmail": valid_email, "duplicate": duplicate})
+
+                except ValidationError:
+                    valid_email = False
+
+            return JsonResponse({"validEmail": valid_email, "duplicate": duplicate})
+
+        else:
+            return JsonResponse({"validEmail": False, "duplicate": False})

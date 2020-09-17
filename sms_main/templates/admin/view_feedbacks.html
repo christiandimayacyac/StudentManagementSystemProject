@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+    {% block content %}
+        <body class="hold-transition sidebar-mini layout-fixed">
+            <div class="wrapper">
+
+            <!-- Navbar -->
+            {% include 'admin/partials/_navbar.html' %}
+
+            <!-- Main Sidebar Container -->
+            {% include 'admin/partials/_main_sidebar.html' %}
+
+            <div class="content-wrapper">
+                <!-- Content Header (Page header) -->
+                {% include 'admin/partials/_main_content_header.html' %}
+
+                <!-- Main content -->
+                <section class="content">
+                    <div class="container-fluid">
+                        <div class="col-md-12">
+                            <!-- general form elements -->
+                            <div class="card">
+                                  <div class="card-header bg-warning">
+                                    <h3 class="card-title">Staff Feedbacks</h3>
+                                    <div class="card-tools">
+                                      <div class="input-group input-group-sm" style="width: 150px;">
+                                        <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                        <div class="input-group-append">
+                                          <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <!-- /.card-header -->
+                                  <div class="card-body table-responsive p-0" style="height: 65vh;">
+                                    <table class="table table-head-fixed table-striped" style="width:100%;">
+                                      <thead>
+                                        <tr>
+                                          <th>ID</th>
+                                          <th style="width:5%;">Staff</th>
+                                          <th style="width:35%;">Feedback</th>
+                                          <th style="width:35%;">Reply</th>
+                                          <th style="width:20%;">Date Created</th>
+                                          <th style="width:5%;">Action</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {% for feedback in feedback_obj %}
+                                        <tr>
+                                          <td>{{feedback.id}}</td>
+                                          <td>{{feedback.staff_id.user_profile.first_name}} {{feedback.staff_id.staff_id.user_profile.last_name}}</td>
+                                          <td>{{feedback.feedback}}</td>
+                                          <td>{{feedback.feedback_reply}}</td>
+                                          <td>{{feedback.date_created|date:"Y-m-d"}}</td>
+                                          <td>
+                                              {% if feedback.feedback_reply %}
+                                                <button class="btn btn-sm btn-success reply_btn" id="reply_edit" data-fid="{{feedback.id}}" data-toggle="modal" data-target="#adminReplyModal">Edit</button>
+                                              {% else %}
+                                                <button class="btn btn-sm btn-primary reply_btn" id="reply_btn" data-fid="{{feedback.id}}" data-toggle="modal" data-target="#adminReplyModal">Reply</button>
+                                              {% endif %}
+
+                                          </td>
+                                        </tr>
+                                      {% endfor %}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                  <!-- /.card-body -->
+                                </div>
+                          </div>
+                    </div><!-- /.container-fluid -->
+                </section>
+            </div>
+            </div>
+            {% include 'admin/partials/_reply_modal.html' %}
+        <script src="{% static 'js/admin.js' %}"></script>
+    {% endblock %}
