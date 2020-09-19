@@ -281,7 +281,8 @@ class AttendanceReport(models.Model):
 
 class LeaveReportStaff(models.Model):
     staff_id = models.ForeignKey(Staff, on_delete=models.CASCADE)
-    leave_date = models.CharField(max_length=255)
+    leave_start_date = models.DateField()
+    leave_end_date = models.DateField()
     leave_message = models.TextField()
     leave_status = models.IntegerField(default=0)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -302,6 +303,7 @@ class StaffFeedBack(models.Model):
     feedback_reply = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=datetime.now)
+    date_replied = models.DateTimeField(blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('staff-feedback')

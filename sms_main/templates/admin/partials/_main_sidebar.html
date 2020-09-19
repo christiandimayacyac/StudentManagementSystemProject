@@ -89,6 +89,13 @@
                 <p>View Feedbacks</p>
               </a>
             </li>
+            <li class="nav-item">
+              {% url 'manage-staff-leaves' as manage_staff_leaves %}
+              <a href="{{manage_staff_leaves}}" class="nav-link {% if request.path == manage_staff_leaves %}active{% endif %}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Manage Staff Leaves</p>
+              </a>
+            </li>
           </ul>
         </li>
 <!--                      STUDENT -->

@@ -22,7 +22,7 @@ from .forms import RegisterStaffForm, RegisterStudentForm, AddCourseForm, AddSub
     AddSchoolYearForm, EditCourseForm, EditSchoolYearForm, AddSectionForm
 from .mixins import AdminCheckMixin
 from .models import Course, Subject, CustomUserProfile, Staff, Student, SchoolYearModel, OfferedSubject, CourseSection, \
-    StaffFeedBack
+    StaffFeedBack, LeaveReportStaff
 from collections import OrderedDict
 
 
@@ -595,6 +595,20 @@ class ViewFeedbacks(LoginRequiredMixin, AdminCheckMixin, ListView):
     }
 
 
+class ManageStaffLeaves(LoginRequiredMixin, AdminCheckMixin, ListView):
+    model = LeaveReportStaff
+    template_name = 'admin/manage_staff_leaves.html'
+    context_object_name = 'leaves_obj'
+
+    links = {
+        'Home': 'admin-dashboard',
+        'Staff Leaves': ''
+    }
+    extra_context = {
+        'breadcrumbs': OrderedDict(links)
+    }
+
+
 class AjaxFeedbackReply(View):
     model = StaffFeedBack
     template_name = 'admin/feedback_reply.html'
@@ -610,10 +624,16 @@ class AjaxFeedbackReply(View):
             body = json.loads(body_unicode)
             fid = int(body['fid'])
             msg = body['msg']
+            print(msg)
             cur_date_time = datetime.datetime.now()
             try:
                 feedback = StaffFeedBack.objects.get(pk=fid)
-                feedback.feedback_reply = msg + " [" + cur_date_time.strftime("%x") + "]"
+                if msg != '' and msg != '-':
+                    feedback.feedback_reply = msg
+                    feedback.date_replied = cur_date_time
+                else:
+                    feedback.feedback_reply = ''
+                    feedback.date_replied = None
                 feedback.save()
                 custom_message(self.request, "Reply sent.", "success")
             except:
@@ -681,3 +701,30 @@ class AjaxCheckEmailDuplicate(View):
 
         else:
             return JsonResponse({"validEmail": False, "duplicate": False})
+
+
+class ApproveRejectStaffLeave(View):
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ApproveRejectStaffLeave, self).dispatch(request, *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        if self.request.method == "POST":
+            # body_unicode = self.request.body.decode('utf-8') decode is only used in python 3.5below
+            body_unicode = self.request.body
+            body = json.loads(body_unicode)
+            try:
+                leave_id = body['leave_id']
+                action = body['action']
+                # Update leave status in DB
+                staff_leave = LeaveReportStaff.objects.get(id=leave_id)
+                staff_leave.leave_status = action
+                staff_leave.save()
+            except:
+                return JsonResponse({"status": False, "action": action})
+            return JsonResponse({"status": True, "action": action})
+
+        else:
+            custom_message(self.request, "Unable to process leave application", "error")
+            return JsonResponse({"status": False})

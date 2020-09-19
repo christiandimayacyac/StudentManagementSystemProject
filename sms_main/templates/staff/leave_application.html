@@ -31,12 +31,19 @@
                                         <div class="form-group">
                                             <input class="form-control" type="hidden" name="staff_id" id="staff_id" value="{{user.id}}">
                                         </div>
-                                        {% if form.leave_date.errors %}
-                                            <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.leave_date.errors }}</div>
+                                        {% if form.leave_start_date.errors %}
+                                            <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.leave_start_date.errors }}</div>
                                         {% endif %}
                                         <div class="form-group">
-                                            <label for="leave_date">Leave Date</label>
-                                            <input class="form-control" type="date" name="leave_date" id="leave_date" required>
+                                            <label for="leave_start_date">Leave Start Date</label>
+                                            <input class="form-control" type="date" name="leave_start_date" id="leave_start_date" required>
+                                        </div>
+                                        {% if form.leave_end_date.errors %}
+                                            <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.leave_end_date.errors }}</div>
+                                        {% endif %}
+                                        <div class="form-group">
+                                            <label for="leave_end_date">Leave Start Date</label>
+                                            <input class="form-control" type="date" name="leave_end_date" id="leave_end_date" required>
                                         </div>
                                         {% if form.leave_message.errors %}
                                             <div class="alert alert-danger alert-dismissible text-center" role="alert">{{ form.leave_message.errors }}</div>

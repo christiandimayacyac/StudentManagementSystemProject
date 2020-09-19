@@ -325,6 +325,11 @@ class LeaveReportView(LoginRequiredMixin, StaffCheckMixin, ListView):
         'page_header_title': 'Leave Report'
     }
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        #Filter only leave applications of the current staff
+        return qs.filter(staff_id=self.request.user.staff.id).order_by('id')
+
 
 class StaffFeedBackView(LoginRequiredMixin, StaffCheckMixin, CreateView):
     model = StaffFeedBack

@@ -52,7 +52,7 @@
                                           <td>{{feedback.id}}</td>
                                           <td>{{feedback.staff_id.user_profile.first_name}} {{feedback.staff_id.staff_id.user_profile.last_name}}</td>
                                           <td>{{feedback.feedback}}</td>
-                                          <td>{{feedback.feedback_reply}}</td>
+                                            <td><p id="f-{{feedback.id}}">{{feedback.feedback_reply|default:'-'}}</p><small>{{feedback.date_replied|date:'m/d/Y P'|default:'-'}}</small></td>
                                           <td>{{feedback.date_created|date:"Y-m-d"}}</td>
                                           <td>
                                               {% if feedback.feedback_reply %}

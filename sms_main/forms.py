@@ -473,7 +473,8 @@ class LeaveApplicationForm(forms.ModelForm):
         model = LeaveReportStaff
         fields = (
             'staff_id',
-            'leave_date',
+            'leave_start_date',
+            'leave_end_date',
             'leave_message'
         )
         exclude = ['leave_status']
@@ -481,14 +482,14 @@ class LeaveApplicationForm(forms.ModelForm):
     def clean(self, *args, **kwargs):
         print("cleaning all")
         cleaned_data = super(LeaveApplicationForm, self).clean()
-        leave_date = self.cleaned_data['leave_date']
+        leave_start_date = self.cleaned_data['leave_start_date']
+        leave_end_date = self.cleaned_data['leave_end_date']
         staff_id = self.cleaned_data['staff_id']
-        if LeaveReportStaff.objects.filter(staff_id=staff_id, leave_date=leave_date):
+        if LeaveReportStaff.objects.filter(staff_id=staff_id, leave_start_date=leave_start_date, leave_end_date=leave_end_date):
             raise ValidationError(_('There is already an existing application on the selected date.'), code='invalid')
         return cleaned_data
 
     def clean_staff_id(self, *args, **kwargs):
-        print("cleaning staff id")
         staff_id = self.cleaned_data['staff_id']
         s_id = Staff.objects.get(user_profile=staff_id)
         if not s_id:

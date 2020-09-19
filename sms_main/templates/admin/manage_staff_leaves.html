@@ -23,7 +23,7 @@
                             <!-- general form elements -->
                                 <div class="card">
                                   <div class="card-header bg-warning">
-                                    <h3 class="card-title">Leave Report History</h3>
+                                    <h3 class="card-title">Manage Staff Leaves</h3>
                                   </div>
                                   <!-- /.card-header -->
                                   <div class="card-body table-responsive p-0" style="height: 65vh;">
@@ -31,6 +31,7 @@
                                       <thead>
                                         <tr>
                                           <th>ID</th>
+                                          <th>Staff</th>
                                           <th>Leave Start Date</th>
                                           <th>Leave End Date</th>
                                           <th>Leave Message</th>
@@ -38,19 +39,23 @@
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {% for report in leave_report_obj %}
+                                        {% for leave in leaves_obj %}
                                             <tr>
-                                              <td>{{report.id}}</td>
-                                              <td>{{report.leave_start_date}}</td>
-                                              <td>{{report.leave_end_date}}</td>
-                                              <td>{{report.leave_message}}</td>
+                                              <td>{{leave.id}}</td>
+                                              <td>{{leave.staff_id.user_profile}}</td>
+                                              <td>{{leave.leave_start_date}}</td>
+                                              <td>{{leave.leave_end_date}}</td>
+                                              <td>{{leave.leave_message}}</td>
                                               <td>
-                                                  {% if report.leave_status == 0 %}
-                                                    <span class="text-secondary ">Pending</span>
-                                                  {% elif report.leave_status == 1 %}
-                                                    <span class="text-success">Approved</span>
+<!--                                                  <span class="leave_stat_app d-none">Approved</span>-->
+<!--                                                  <span class="leave_stat_rej d-none">Rejected</span>-->
+                                                  {% if leave.leave_status == 0 %}
+                                                    <button class="btn btn-sm btn-primary leave_action_btn approve_leave_btn"  data-action="1" data-lid="{{leave.id}}">Approve</button>
+                                                    <button class="btn btn-sm btn-danger leave_action_btn reject_leave_btn" data-action="2" data-lid="{{leave.id}}">Reject</button>
+                                                  {% elif leave.leave_status == 1 %}
+                                                    <span class="text-success leave_stat_app">Approved</span>
                                                   {% else %}
-                                                    <span class="text-danger">Rejected</span>
+                                                    <span class="text-secondary leave_stat_rej">Rejected</span>
                                                   {% endif %}
                                               </td>
                                             </tr>
@@ -66,5 +71,5 @@
                 </section>
             </div>
             </div>
-        </body>
+        <script src="{% static 'js/admin.js' %}"></script>
     {% endblock %}
